@@ -1,0 +1,8 @@
+.main-content {
+  height: 100vh; /* Use 100vh to take full viewport height */
+  width: calc(100% - 190px); /* Adjust width to account for the navbar */
+  margin-left: 190px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
+}

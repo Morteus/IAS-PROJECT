@@ -1,0 +1,103 @@
+/* History.css */
+
+.title {
+  height: 100px;
+  width: 100%;
+  display: flex;
+  padding: 40px;
+}
+
+.main-content .title label {
+  font-size: 2em;
+  font-weight: 700;
+  color: #2b2b2b;
+}
+
+.history-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  padding: 30px;
+  overflow: auto; /* Changed from hidden to auto */
+}
+
+/* Hide scrollbar for WebKit browsers (Chrome, Safari, Edge) */
+.history-container::-webkit-scrollbar {
+  width: 0px; /* Set width to 0 to hide */
+  background: transparent; /* Optional: make the track transparent */
+}
+
+/* Hide scrollbar for IE and Edge */
+.history-container {
+  -ms-overflow-style: none; /* Hide the scrollbar */
+}
+
+/* Hide scrollbar for Firefox */
+.history-container {
+  scrollbar-width: none; /* Hide the scrollbar */
+}
+
+.table-container {
+  overflow-y: auto;
+  flex-grow: 1;
+  box-shadow: 5px 5px 10px rgb(160, 160, 160);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  padding: 0px;
+}
+
+.table-container table {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-container tbody {
+  padding-top: 0px;
+}
+
+.table-container th {
+  position: sticky;
+  top: 0;
+  background-color: #2b2b2b;
+  color: white;
+  height: 40px;
+  text-align: center;
+}
+
+/* Rounded corners for the first header cell */
+.table-container th:first-child {
+  border-top-left-radius: 10px;
+}
+
+/* Rounded corners for the last header cell */
+.table-container th:last-child {
+  border-top-right-radius: 10px;
+}
+
+.table-container tr {
+  background-color: #f0f0f0;
+}
+
+/* Rounded corners for the first data cell in each row */
+.table-container tr td:first-child {
+  border-bottom-left-radius: 10px;
+}
+
+/* Rounded corners for the last data cell in each row */
+.table-container tr td:last-child {
+  border-bottom-right-radius: 10px;
+}
+
+.table-container td {
+  font-size: 1rem;
+  text-align: center;
+  padding: 10px;
+}
+
+.table-container tr:not(:last-child) {
+  border-bottom: 1px solid #c9c9c9;
+}

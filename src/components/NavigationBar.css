@@ -1,0 +1,120 @@
+.a {
+  text-decoration: none;
+
+  display: flex;
+
+  padding: 10px;
+}
+
+.nav {
+  height: 100%;
+  max-height: 100vh; /* Add this line */
+  overflow-y: auto; /* Add this line */
+  width: 190px;
+  background-color: #2b2b2b;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+}
+.nav::-webkit-scrollbar {
+  display: none;
+}
+
+#userNameLabel {
+  font-weight: 200;
+  font-size: 0.9rem;
+  color: white;
+}
+.info {
+  display: flex;
+}
+.imagecont {
+  background-color: white;
+  height: fit-content;
+  width: fit-content;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px;
+}
+.info img {
+  height: 50px;
+  width: 50px;
+}
+
+.infocont-child {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+.infocont-child label {
+  color: white;
+  font-weight: 500;
+}
+ul {
+  padding: 0px;
+  margin-top: 50px;
+  position: relative;
+  width: inherit;
+  display: flex;
+  flex-direction: column;
+}
+li {
+  display: flex;
+  padding: 10px;
+  border-radius: 10px;
+  list-style: none;
+  min-width: inherit;
+  z-index: 0;
+  cursor: pointer;
+  position: relative; /* Add this line */
+  overflow: hidden; /* Add this line */
+}
+li::after {
+  content: "";
+  border-radius: 10px; /* Changed to match li border-radius */
+  height: 100%;
+  width: 0px;
+  background: white;
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  left: 0;
+  transition: width 100ms ease-in-out; /* Added width to the transition */
+}
+
+li:hover::after {
+  width: 100%;
+}
+
+li .fa-icon {
+  margin-right: 10px;
+  height: 1.2rem;
+  width: 1.2rem;
+  color: #b3b3b3;
+}
+
+li .a label {
+  font-size: 1.2rem;
+  color: white;
+}
+li:hover .fa-icon {
+  color: #2b2b2b; /* Change icon color on hover */
+}
+
+li:hover a label {
+  color: #2b2b2b; /* Change label color on hover */
+  font-weight: 500;
+}
+
+ul label {
+  font-weight: 200;
+  font-size: medium;
+}
+
+.logout {
+  margin-top: auto; /* Push the logout to the bottom */
+  margin-bottom: 50px;
+}

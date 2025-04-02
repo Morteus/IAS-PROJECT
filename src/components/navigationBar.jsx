@@ -1,0 +1,91 @@
+import "./NavigationBar.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faHouse,
+  faHourglassEmpty,
+  faGear,
+  faHand,
+  faRightFromBracket,
+} from "@fortawesome/free-solid-svg-icons";
+import LogoImage from "../assets/Bolls.png";
+import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useUsernameListener } from "../databaseComponent";
+
+function NavBar() {
+  const [username, setUsername] = useState("Loading..."); // Default username
+  const userId = localStorage.getItem("userId");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (userId) {
+      const unsubscribe = useUsernameListener(userId, setUsername);
+
+      return () => {
+        unsubscribe(); // Cleanup the listener when the component unmounts
+      };
+    } else {
+      setUsername("Not Logged In");
+    }
+  }, [userId]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("userId");
+    localStorage.removeItem("userName");
+    navigate("/Login");
+  };
+
+  return (
+    <div className="nav">
+      <div className="info">
+        <div className="imagecont">
+          <img src={LogoImage} alt="" />
+        </div>
+        <div className="infocont-child">
+          <label>ParkingSystem</label>
+          <label id="userNameLabel">{username}</label>
+        </div>
+      </div>
+      <div className="navigationlinks">
+        <ul>
+          <li>
+            <Link to="/Dashboard" className="a">
+              <FontAwesomeIcon icon={faHouse} className="fa-icon" />
+              <label htmlFor="home">Dashboard</label>
+            </Link>
+          </li>
+          <li>
+            <Link to="/History" id="navigateToHistory" className="a">
+              <FontAwesomeIcon icon={faHourglassEmpty} className="fa-icon" />
+              <label htmlFor="history">History</label>
+            </Link>
+          </li>
+          <li>
+            <Link to="/Manual" id="navigateToManual" className="a">
+              <FontAwesomeIcon icon={faHand} className="fa-icon" />
+              <label htmlFor="manual">Manual</label>
+            </Link>
+          </li>
+          <li>
+            <Link to="/Settings" id="navigateToSettings" className="a">
+              <FontAwesomeIcon icon={faGear} className="fa-icon" />
+              <label htmlFor="settings">Settings</label>
+            </Link>
+          </li>
+        </ul>
+      </div>
+      <div className="logout">
+        <ul>
+          <li>
+            <div onClick={handleLogout} id="navigateToLogout" className="a">
+              <FontAwesomeIcon icon={faRightFromBracket} className="fa-icon" />
+              <label htmlFor="logout">Logout</label>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+export default NavBar;

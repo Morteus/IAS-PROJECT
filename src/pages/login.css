@@ -1,0 +1,83 @@
+/* General Styles */
+.login-body {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Login Container */
+.login-container {
+  display: flex; /* Stack children vertically */
+  height: 600px;
+  width: 700px;
+  border-radius: 25px;
+  border: 2px solid black;
+}
+
+/* Input Container */
+.input-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 30px;
+  gap: 10px;
+}
+
+.input-container-child {
+  margin-top: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.input-container input[type="text"] {
+  height: 40px;
+  border-radius: 10px;
+  border-style: 1px solid grey;
+  padding: 10px;
+}
+
+/* Password Box */
+.input-container .password-box {
+  height: 40px;
+  border-radius: 10px;
+  border-style: 1px solid grey;
+  padding: 0px; /* Overwrites the previous padding */
+  border: 2px solid #2b2b2b;
+}
+
+.password-box input[type="text"],
+.password-box input[type="password"] {
+  height: 100%;
+  width: 90%;
+  border: none;
+  outline: none;
+  box-shadow: none; /* Remove any box-shadow */
+  padding: 10px;
+  border-radius: 10px;
+}
+
+/* Logo Container */
+.logo-container {
+  flex: 1;
+  border-radius: 0px 20px 20px 0px;
+  background-color: #2b2b2b;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+}
+button {
+  height: 60px;
+  border-radius: 10px;
+  background-color: #2b2b2b;
+  color: white;
+  margin-top: 30px;
+  font-size: 1.5rem;
+}
+
+button:active {
+  scale: 0.95;
+}
