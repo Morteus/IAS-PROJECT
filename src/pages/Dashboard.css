@@ -144,10 +144,10 @@ body {
   padding: 40px;
 }
 
-.loggedin-outcontainer input[type="text"] {
+.loggedin-outcontainer span {
   height: 40px;
   border-radius: 10px;
-  border-style: 1px solid grey;
+  border: 1px solid black;
   padding: 10px;
 }
 .box-1 table td {
