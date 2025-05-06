@@ -78,9 +78,7 @@ function Login() {
                   color: "#2b2b2b",
                   textDecoration: "none",
                 }}
-              >
-                Forgot Password?
-              </a>
+              ></a>
             </div>
           </form>
         </div>

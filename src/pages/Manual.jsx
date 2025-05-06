@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   collection,
   addDoc,
@@ -8,6 +8,8 @@ import {
   getDocs,
   updateDoc,
   doc,
+  onSnapshot,
+  getDoc,
 } from "firebase/firestore";
 import { db } from "../firebasedepc/Firebase";
 import "./Manual.css";
@@ -20,6 +22,22 @@ function Manual() {
   });
   const [buttonText, setButtonText] = useState("Login");
   const [isLoading, setIsLoading] = useState(false);
+  const [activeUsers, setActiveUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [timeNow, setTimeNow] = useState(new Date());
+  const [showModal, setShowModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [formErrors, setFormErrors] = useState({
+    uid: "",
+    name: "",
+    plateNumber: "",
+  });
+  const [submitError, setSubmitError] = useState("");
+  const [totalSlots] = useState(10);
+  const [showParkingFullModal, setShowParkingFullModal] = useState(false);
+  const [entryGateStatus, setEntryGateStatus] = useState("Closed");
+  const [exitGateStatus, setExitGateStatus] = useState("Closed");
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -27,6 +45,35 @@ function Manual() {
       ...prevState,
       [name]: value,
     }));
+  };
+
+  const validateForm = () => {
+    let errors = {};
+    let isValid = true;
+
+    if (!formData.uid.trim()) {
+      errors.uid = "UID is required";
+      isValid = false;
+    } else if (!/^[A-Za-z0-9]+$/.test(formData.uid)) {
+      errors.uid = "UID must contain only letters and numbers";
+      isValid = false;
+    }
+
+    if (!formData.name.trim()) {
+      errors.name = "Name is required";
+      isValid = false;
+    }
+
+    if (!formData.plateNumber.trim()) {
+      errors.plateNumber = "Plate Number is required";
+      isValid = false;
+    } else if (!/^[A-Za-z0-9\s-]+$/.test(formData.plateNumber)) {
+      errors.plateNumber = "Invalid plate number format";
+      isValid = false;
+    }
+
+    setFormErrors(errors);
+    return isValid;
   };
 
   const isUserLoggedIn = async (userId) => {
@@ -39,8 +86,21 @@ function Manual() {
     return !querySnapshot.empty;
   };
 
+  const checkAvailableSlots = async () => {
+    const q = query(collection(db, "history"), where("LOGGED_OUT", "==", null));
+    const snapshot = await getDocs(q);
+    return totalSlots - snapshot.docs.length;
+  };
+
   const logLogin = async (formData) => {
     try {
+      const availableSlots = await checkAvailableSlots();
+
+      if (availableSlots <= 0) {
+        setShowParkingFullModal(true);
+        return null;
+      }
+
       const docRef = await addDoc(collection(db, "history"), {
         ID: formData.uid,
         Name: formData.name,
@@ -59,45 +119,46 @@ function Manual() {
     }
   };
 
-  const calculateTotalTime = async (loggedInTimestamp, loggedOutTimestamp) => {
-    const loggedInDate = loggedInTimestamp.toDate();
-    const loggedOutDate = new Date();
-    const timeDifference = loggedOutDate.getTime() - loggedInDate.getTime();
-    const totalSeconds = Math.floor(timeDifference / 1000);
+  const calculateTotalTime = (loginTime) => {
+    if (!loginTime) return "00:00:00";
+
+    const now = new Date();
+    const loginDate =
+      loginTime instanceof Date ? loginTime : loginTime.toDate();
+    const diff = Math.max(0, now - loginDate); // Ensure non-negative difference
+
+    const totalSeconds = Math.floor(diff / 1000);
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const seconds = totalSeconds % 60;
+
     return `${hours.toString().padStart(2, "0")}:${minutes
       .toString()
       .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
   };
 
-  const logLogout = async (userId) => {
+  const logLogout = async (userId, docId) => {
     try {
-      const q = query(
-        collection(db, "history"),
-        where("ID", "==", userId),
-        where("LOGGED_OUT", "==", null)
-      );
-      const querySnapshot = await getDocs(q);
+      const docRef = doc(db, "history", docId);
+      const docSnap = await getDoc(docRef);
 
-      if (querySnapshot.empty) {
-        alert("No active login found for this user.");
+      if (!docSnap.exists()) {
+        alert("No document found!");
         return;
       }
 
-      const docToUpdate = querySnapshot.docs[0];
-      const docRef = doc(db, "history", docToUpdate.id);
-      const loginData = docToUpdate.data();
+      const loginData = docSnap.data();
       const loggedInTimestamp = loginData.LOGGED_IN;
-      const loggedOutTimestamp = serverTimestamp();
-      const totalTime = await calculateTotalTime(
-        loggedInTimestamp,
-        loggedOutTimestamp
-      );
+
+      if (!loggedInTimestamp) {
+        console.error("No login timestamp found");
+        return;
+      }
+
+      const totalTime = calculateTotalTime(loggedInTimestamp.toDate());
 
       await updateDoc(docRef, {
-        LOGGED_OUT: loggedOutTimestamp,
+        LOGGED_OUT: serverTimestamp(),
         TotalTime: totalTime,
       });
 
@@ -110,8 +171,9 @@ function Manual() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.uid.trim()) {
-      alert("Please enter a UID.");
+    setSubmitError("");
+
+    if (!validateForm()) {
       return;
     }
 
@@ -119,27 +181,100 @@ function Manual() {
     try {
       const loggedIn = await isUserLoggedIn(formData.uid);
       if (loggedIn) {
-        await logLogout(formData.uid);
+        setSubmitError(
+          `User with ID ${formData.uid} is already logged in. Please log them out first.`
+        );
         setButtonText("Login");
-      } else {
-        await logLogin(formData);
-        setButtonText("Logout");
+        return;
       }
-      // Clear form after successful submission
+
+      await logLogin(formData);
+      setButtonText("Logout");
       setFormData({ uid: "", name: "", plateNumber: "" });
+      setFormErrors({});
+      setSubmitError(""); // Clear any existing error
     } catch (error) {
       console.error("Error:", error);
-      alert("An error occurred. Please try again.");
+      setSubmitError("An error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleGateControl = (gate) => {
-    // Add your gate control logic here
-    console.log(`Opening ${gate} gate`);
-    alert(`${gate} gate opening...`);
+  const handleGateControl = (gate, action) => {
+    if (gate === "Entry") {
+      setEntryGateStatus(action === "Open" ? "Open" : "Closed");
+    } else {
+      setExitGateStatus(action === "Open" ? "Open" : "Closed");
+    }
+    console.log(`${action}ing ${gate} gate`);
+    alert(`${gate} gate ${action.toLowerCase()}ing...`);
   };
+
+  const handleLogoutClick = (user) => {
+    setSelectedUser(user);
+    setShowModal(true);
+  };
+
+  const handleConfirmLogout = async () => {
+    if (!selectedUser) return;
+    try {
+      await logLogout(selectedUser.ID, selectedUser.id);
+      setShowModal(false);
+      setSelectedUser(null);
+      setSubmitError(""); // Clear error after successful logout
+    } catch (error) {
+      console.error("Error during logout:", error);
+      setSubmitError("Error during logout. Please try again.");
+    }
+  };
+
+  const handleInputFocus = () => {
+    setSubmitError(""); // Clear error when user starts typing again
+  };
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeNow(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const activeUsersQuery = query(
+      collection(db, "history"),
+      where("LOGGED_OUT", "==", null)
+    );
+
+    const unsubscribe = onSnapshot(
+      activeUsersQuery,
+      (snapshot) => {
+        const activeUsersList = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          const loginDate = data.LOGGED_IN
+            ? data.LOGGED_IN.toDate()
+            : new Date();
+          return {
+            id: doc.id,
+            ID: data.ID,
+            Name: data.Name,
+            Platenumber: data.Platenumber,
+            loginTime: loginDate.toLocaleString(),
+            loginDate: loginDate,
+          };
+        });
+        setActiveUsers(activeUsersList);
+        setLoading(false);
+      },
+      (error) => {
+        console.error("Error fetching active users:", error);
+        setError(error.message);
+        setLoading(false);
+      }
+    );
+
+    return () => unsubscribe();
+  }, []);
 
   return (
     <div className="main-content">
@@ -148,7 +283,6 @@ function Manual() {
       </div>
       <div className="manual-container">
         <div className="input-grid">
-          {/* Login Card */}
           <div className="input-card">
             <div className="cardtitle">
               <label>Vehicle Login</label>
@@ -161,8 +295,13 @@ function Manual() {
                   name="uid"
                   value={formData.uid}
                   onChange={handleInputChange}
+                  onFocus={handleInputFocus}
                   placeholder="Enter UID"
+                  className={formErrors.uid ? "error" : ""}
                 />
+                {formErrors.uid && (
+                  <span className="error-text">{formErrors.uid}</span>
+                )}
               </div>
               <div className="input-group">
                 <label>Name</label>
@@ -171,8 +310,13 @@ function Manual() {
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
+                  onFocus={handleInputFocus}
                   placeholder="Enter Name"
+                  className={formErrors.name ? "error" : ""}
                 />
+                {formErrors.name && (
+                  <span className="error-text">{formErrors.name}</span>
+                )}
               </div>
               <div className="input-group">
                 <label>Plate Number</label>
@@ -181,57 +325,176 @@ function Manual() {
                   name="plateNumber"
                   value={formData.plateNumber}
                   onChange={handleInputChange}
+                  onFocus={handleInputFocus}
                   placeholder="Enter Plate Number"
+                  className={formErrors.plateNumber ? "error" : ""}
                 />
+                {formErrors.plateNumber && (
+                  <span className="error-text">{formErrors.plateNumber}</span>
+                )}
               </div>
+              {submitError && <div className="submit-error">{submitError}</div>}
               <button type="submit" disabled={isLoading}>
-                {isLoading ? "Processing..." : "Login"}
+                {isLoading ? "Processing..." : buttonText}
               </button>
             </form>
           </div>
-
-          {/* Logout Card */}
-          <div className="input-card">
-            <div className="cardtitle">
-              <label>Vehicle Logout</label>
-            </div>
-            <form onSubmit={handleSubmit}>
-              <div className="input-group">
-                <label>UID</label>
-                <input
-                  type="text"
-                  name="uid"
-                  placeholder="Enter UID to Logout"
-                />
+          <div className="controls-column">
+            <div className="input-card">
+              <div className="cardtitle">
+                <label>Entry Gate</label>
               </div>
-              <button type="submit" disabled={isLoading}>
-                {isLoading ? "Processing..." : "Logout"}
-              </button>
-            </form>
-          </div>
-
-          {/* Gate Control Card */}
-          <div className="input-card">
-            <div className="cardtitle">
-              <label>Gate Controls</label>
+              <div className="gate-controls">
+                <button
+                  className="gate-button entry"
+                  onClick={() => handleGateControl("Entry", "Open")}
+                  disabled={entryGateStatus === "Open"}
+                >
+                  Open Gate
+                </button>
+                <button
+                  className="gate-button entry"
+                  onClick={() => handleGateControl("Entry", "Close")}
+                  disabled={entryGateStatus === "Closed"}
+                >
+                  Close Gate
+                </button>
+                <div className="gate-status">
+                  Status:{" "}
+                  <span className={entryGateStatus.toLowerCase()}>
+                    {entryGateStatus}
+                  </span>
+                </div>
+              </div>
             </div>
-            <div className="gate-controls">
+
+            <div className="input-card">
+              <div className="cardtitle">
+                <label>Exit Gate</label>
+              </div>
+              <div className="gate-controls">
+                <button
+                  className="gate-button exit"
+                  onClick={() => handleGateControl("Exit", "Open")}
+                  disabled={exitGateStatus === "Open"}
+                >
+                  Open Gate
+                </button>
+                <button
+                  className="gate-button exit"
+                  onClick={() => handleGateControl("Exit", "Close")}
+                  disabled={exitGateStatus === "Closed"}
+                >
+                  Close Gate
+                </button>
+                <div className="gate-status">
+                  Status:{" "}
+                  <span className={exitGateStatus.toLowerCase()}>
+                    {exitGateStatus}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="active-users-section">
+          <h2>Currently Active Vehicles</h2>
+          {loading && <p>Loading...</p>}
+          {error && <p className="error-message">Error: {error}</p>}
+          <div className="active-users-grid">
+            {activeUsers.map((user) => (
+              <div key={user.id} className="user-card">
+                <div className="status-indicator"></div>
+                <h3>UID: {user.ID}</h3>
+                <p>Name: {user.Name}</p>
+                <p>Plate Number: {user.Platenumber}</p>
+                <p>Login Time: {user.loginTime}</p>
+                <p className="elapsed-time">
+                  Duration: {calculateTotalTime(user.loginDate)}
+                </p>
+                <button
+                  className="force-logout-btn nav-colored-btn"
+                  onClick={() => handleLogoutClick(user)}
+                >
+                  Logout
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {showParkingFullModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>Parking Full</h3>
+            <div className="modal-details warning">
+              <p>Maximum parking capacity reached.</p>
+              <p>Please wait for available space.</p>
+            </div>
+            <div className="modal-buttons">
               <button
-                className="gate-button entry"
-                onClick={() => handleGateControl("Entry")}
+                className="modal-button confirm"
+                onClick={() => setShowParkingFullModal(false)}
               >
-                Open Entry Gate
-              </button>
-              <button
-                className="gate-button exit"
-                onClick={() => handleGateControl("Exit")}
-              >
-                Open Exit Gate
+                Understood
               </button>
             </div>
           </div>
         </div>
-      </div>
+      )}
+
+      {showModal && !showParkingFullModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>Confirm Logout</h3>
+            <p>Are you sure you want to log out this user?</p>
+            <div className="modal-details">
+              <p>UID: {selectedUser?.ID}</p>
+              <p>Name: {selectedUser?.Name}</p>
+              <p>Plate Number: {selectedUser?.Platenumber}</p>
+            </div>
+            <div className="modal-buttons">
+              <button
+                className="modal-button confirm"
+                onClick={handleConfirmLogout}
+              >
+                Confirm
+              </button>
+              <button
+                className="modal-button cancel"
+                onClick={() => {
+                  setShowModal(false);
+                  setSelectedUser(null);
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showModal && submitError && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>Parking Full</h3>
+            <p>{submitError}</p>
+            <div className="modal-buttons">
+              <button
+                className="modal-button confirm"
+                onClick={() => {
+                  setShowModal(false);
+                  setSubmitError("");
+                }}
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

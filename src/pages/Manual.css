@@ -1,36 +1,57 @@
 .manual-container {
   padding: 20px;
-  height: calc(100vh - 100px);
-  overflow-y: auto;
+  height: auto; /* Remove fixed height */
+  overflow-y: visible; /* Remove scroll from this container */
 }
 
 .input-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* Change to 3 columns */
-  gap: 2em;
-  padding: 20px;
-  max-width: 1200px; /* Set a max-width for the grid */
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5em;
+  padding: 30px;
+  max-width: 1400px;
   margin: 0 auto;
-  justify-content: center; /* Center the grid */
+  width: 100%;
+}
+
+.controls-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  height: 100%;
+}
+
+.controls-column .input-card {
+  flex: 1;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  height: calc(
+    50% - 0.5rem
+  ); /* Each card takes up half the height minus half the gap */
+}
+
+/* Modify input-card for gate controls */
+.input-card.gate-control-card {
+  margin-bottom: 20px;
 }
 
 /* Responsive layout for smaller screens */
 @media (max-width: 768px) {
   .input-grid {
     grid-template-columns: 1fr; /* Stack cards on mobile */
-    gap: 1em;
+    gap: 1.5em;
   }
 }
 
 .input-card {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   border: 1px solid #eaeaea;
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
-  overflow: hidden;
-  max-width: 500px;
-  margin: 0; /* Remove auto margins */
+  transition: box-shadow 0.3s ease;
+  max-width: 600px;
+  margin: 0 auto;
   min-width: 0; /* Allow cards to shrink */
   height: fit-content; /* Adjust height based on content */
   width: 100%; /* Take full width of grid cell */
@@ -56,11 +77,14 @@
 }
 
 .input-card form {
-  padding: 20px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .input-group {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .input-group label {
@@ -72,16 +96,44 @@
 
 .input-group input {
   width: 100%;
-  padding: 10px;
+  padding: 12px 16px;
   border: 1px solid #eaeaea;
-  border-radius: 8px;
-  font-size: 0.95em;
-  transition: border-color 0.2s ease;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
 }
 
 .input-group input:focus {
   outline: none;
   border-color: #232323;
+}
+
+.input-group input.error {
+  border-color: #ff4444;
+  background-color: #fff8f8;
+}
+
+.error-text {
+  color: #ff4444;
+  font-size: 0.8em;
+  margin-top: 4px;
+  display: block;
+}
+
+.submit-error {
+  background-color: #ffe5e5;
+  color: #ff4444;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  text-align: center;
+  font-weight: 500;
+  border: 1px solid #ffcdd2;
+}
+
+.input-group input:focus.error {
+  border-color: #ff4444;
+  box-shadow: 0 0 0 2px rgba(255, 68, 68, 0.1);
 }
 
 .input-card button {
@@ -106,35 +158,269 @@
 }
 
 .gate-controls {
+  padding: 16px;
   display: flex;
-  flex-direction: column;
-  gap: 20px;
-  padding: 20px;
+  flex-direction: column; /* Changed from row to column */
+  gap: 12px;
+  height: auto; /* Adjusted height for vertical buttons */
 }
 
 .gate-button {
-  padding: 20px !important;
-  font-size: 1.2em !important;
-  margin-bottom: 10px;
+  flex: 1;
+  padding: 12px 24px !important; /* Adjusted padding */
+  font-size: 1em !important;
+  border-radius: 12px !important;
+  transition: all 0.3s ease !important;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0;
 }
 
-.gate-button.entry {
-  background: #2e7d32 !important;
+.gate-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-.gate-button.exit {
-  background: #c62828 !important;
+.gate-status {
+  text-align: center;
+  padding: 10px;
+  font-weight: 500;
+  margin-top: auto;
+}
+
+.gate-status span {
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.gate-status span.open {
+  color: #2e7d32;
+  background-color: rgba(46, 125, 50, 0.1);
+}
+
+.gate-status span.closed {
+  color: #c62828;
+  background-color: rgba(198, 40, 40, 0.1);
 }
 
 /* Responsive layout update */
 @media (max-width: 1200px) {
   .input-grid {
     grid-template-columns: repeat(2, 1fr);
+    padding: 20px;
   }
 }
 
 @media (max-width: 768px) {
   .input-grid {
     grid-template-columns: 1fr;
+    gap: 1.5em;
+  }
+
+  .input-card {
+    max-width: 100%;
+  }
+
+  .gate-controls {
+    flex-direction: column;
+    height: auto;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .gate-button {
+    padding: 12px !important;
+  }
+}
+
+.active-users-section {
+  margin-top: 40px;
+  padding: 20px;
+  border-radius: 12px;
+  background: #f5f5f5;
+  /* Remove height and overflow properties */
+}
+
+.active-users-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); /* Exactly 5 columns */
+  gap: 20px;
+  padding: 20px;
+}
+
+@media (max-width: 1400px) {
+  .active-users-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 1200px) {
+  .active-users-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .active-users-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .active-users-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Remove scrollbar styling since we're not using it anymore */
+.active-users-section::-webkit-scrollbar,
+.active-users-section::-webkit-scrollbar-track,
+.active-users-section::-webkit-scrollbar-thumb,
+.active-users-section::-webkit-scrollbar-thumb:hover {
+  display: none;
+}
+
+.user-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #eaeaea;
+  position: relative;
+}
+
+.status-indicator {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #2e7d32;
+  box-shadow: 0 0 5px #2e7d32;
+}
+
+.elapsed-time {
+  color: #232323;
+  font-weight: bold;
+  margin: 10px 0;
+}
+
+.force-logout-btn {
+  width: 100%;
+  margin-top: 10px !important;
+  background: #c62828 !important;
+}
+
+.nav-colored-btn {
+  background-color: #232323 !important;
+  color: white;
+}
+
+.nav-colored-btn:hover {
+  background-color: #3a3a3a !important;
+}
+
+/* Remove or comment out this block to avoid conflicts
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  pointer-events: auto;
+  backdrop-filter: blur(4px);
+}
+*/
+
+.modal-content {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modal-details {
+  margin: 16px 0;
+  padding: 12px;
+  background: #f5f5f5;
+  border-radius: 8px;
+}
+
+.modal-details.warning {
+  background-color: #fff5f5;
+  border: 1px solid #ff4444;
+  padding: 16px;
+  text-align: center;
+}
+
+.modal-details.warning p {
+  color: #ff4444;
+  font-weight: 500;
+  margin: 8px 0;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  margin-top: 20px;
+  padding: 0 12px;
+  align-items: center;
+}
+
+.modal-button {
+  flex: 1;
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  min-width: 120px;
+  font-size: 1rem;
+  background-color: #232323;
+}
+
+.modal-button.confirm {
+  background: #232323;
+  color: white;
+  transform-origin: center;
+}
+
+.modal-button.confirm:hover {
+  background: #3a3a3a;
+  transform: scale(1.02);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.modal-button.cancel {
+  background: #e0e0e0;
+  color: #333;
+  transform-origin: center;
+}
+
+.modal-button.cancel:hover {
+  background: #d0d0d0;
+  transform: scale(1.02);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 480px) {
+  .modal-buttons {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .modal-button {
+    width: 100%;
   }
 }

@@ -227,6 +227,7 @@ body {
   font-weight: 700;
   padding: 15px;
   text-align: center;
+  z-index: 1; /* Lower z-index than modal */
 }
 
 /* Add specific styles for header corners */
@@ -371,4 +372,93 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+/* Styles for the slots indicator */
+.slots-indicator {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  margin: 20px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.slots-indicator.full {
+  background: #fff5f5;
+  border: 1px solid #ff4444;
+}
+
+.slot-count {
+  font-size: 3rem;
+  font-weight: bold;
+  color: #232323;
+  margin: 10px 0;
+}
+
+.slots-indicator.full .slot-count {
+  color: #ff4444;
+}
+
+.warning-text {
+  color: #ff4444;
+  font-weight: 500;
+  margin-top: 10px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-bottom: 1em;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 12px 16px;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.loggedin-outcontainer {
+  text-align: left;
+  padding: 16px;
+}
+
+.loggedin-outcontainer label {
+  display: inline-block;
+  width: 120px;
+  font-weight: 500;
+  color: #666;
+}
+
+.loggedin-outcontainer span {
+  color: #232323;
+}
+
+.count-display {
+  text-align: left;
+  padding: 16px;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999; /* Increased z-index */
+  pointer-events: auto; /* Ensure overlay captures all clicks */
+  backdrop-filter: blur(4px);
 }

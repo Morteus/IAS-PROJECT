@@ -8,61 +8,64 @@ import NavBar from "./components/navigationBar";
 import Login from "./pages/Login";
 import LoginLogout from "./pages/LoginLogout";
 import Manual from "./pages/Manual";
+import { ModalProvider } from "./context/ModalContext";
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* Login Route (No NavBar) */}
-        <Route path="/Login" element={<Login />} />
+    <ModalProvider>
+      <BrowserRouter>
+        <Routes>
+          {/* Login Route (No NavBar) */}
+          <Route path="/Login" element={<Login />} />
 
-        {/* Dashboard Route (With NavBar) */}
-        <Route
-          path="/Dashboard"
-          element={
-            <>
-              <NavBar />
-              <Dashboard />
-            </>
-          }
-        />
+          {/* Dashboard Route (With NavBar) */}
+          <Route
+            path="/Dashboard"
+            element={
+              <>
+                <NavBar />
+                <Dashboard />
+              </>
+            }
+          />
 
-        {/* History Route (With NavBar) */}
-        <Route
-          path="/History"
-          element={
-            <>
-              <NavBar />
-              <History />
-            </>
-          }
-        />
+          {/* History Route (With NavBar) */}
+          <Route
+            path="/History"
+            element={
+              <>
+                <NavBar />
+                <History />
+              </>
+            }
+          />
 
-        {/* Manual Route (With NavBar) */}
-        <Route
-          path="/Manual"
-          element={
-            <>
-              <NavBar />
-              <Manual />
-            </>
-          }
-        />
+          {/* Manual Route (With NavBar) */}
+          <Route
+            path="/Manual"
+            element={
+              <>
+                <NavBar />
+                <Manual />
+              </>
+            }
+          />
 
-        <Route
-          path="/LoginLogout" // Changed from login-logout to match navigation
-          element={
-            <>
-              <NavBar />
-              <LoginLogout />
-            </>
-          }
-        />
+          <Route
+            path="/LoginLogout" // Changed from login-logout to match navigation
+            element={
+              <>
+                <NavBar />
+                <LoginLogout />
+              </>
+            }
+          />
 
-        {/* Default route */}
-        <Route path="/" element={<Login />} />
-      </Routes>
-    </BrowserRouter>
+          {/* Default route */}
+          <Route path="/" element={<Login />} />
+        </Routes>
+      </BrowserRouter>
+    </ModalProvider>
   );
 }
 

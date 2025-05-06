@@ -1,10 +1,16 @@
 /* History.css */
 
+.main-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
 .title {
-  height: 100px;
+  height: 60px; /* Reduced from 100px */
   width: 100%;
   display: flex;
-  padding: 40px;
+  padding: 20px 40px; /* Adjusted padding */
 }
 
 .main-content .title label {
@@ -17,105 +23,86 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: calc(100vh - 100px);
-  padding: 20px;
-  overflow: hidden;
+  height: calc(100vh - 60px);
+  padding: 0 20px 20px 20px;
+  margin: 0;
+  flex: 1;
 }
 
-.table-container {
+.table-history-container {
+  flex: 1;
+  margin: 0 20px 20px 20px;
   background: white;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  overflow: auto; /* Change from hidden to auto */
-  height: 100%;
-  margin: 0;
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  overflow: auto;
   border: 1px solid #eaeaea;
-  padding-right: 15px; /* Increased padding to prevent content overlap */
+  display: flex;
+  flex-direction: column;
 }
 
-/* Remove all webkit scrollbar hiding */
-/* Delete these sections as they're causing issues */
-.table-container::-webkit-scrollbar,
-.history-container::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-.table-container::-webkit-scrollbar-track,
-.history-container::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 3px;
-}
-
-.table-container::-webkit-scrollbar-thumb,
-.history-container::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 3px;
-}
-
-.table-container:hover {
+.table-history-container:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   transform: translateY(-2px);
 }
 
-.table-container table {
-  margin: 0;
-  padding: 0;
-  width: calc(100% - 15px); /* Subtract padding to prevent horizontal scroll */
+.table-history-container table {
+  width: 100%;
   border-collapse: collapse;
   border-radius: 12px;
+  position: relative;
 }
 
-.table-container th {
+.table-history-container th {
   position: sticky;
   top: 0;
   background: #232323;
   color: #fff;
   font-family: "Poppins", sans-serif;
   font-size: 1em;
-  font-weight: 700;
-  padding: 15px;
-  text-align: center;
+  font-weight: 600;
+  padding: 16px;
+  text-align: left;
   height: auto;
   border-bottom: 1px solid #eaeaea;
+  z-index: 1;
 }
 
 /* Rounded corners for the first header cell */
-.table-container th:first-child {
+.table-history-container th:first-child {
   border-top-left-radius: 10px;
 }
 
 /* Rounded corners for the last header cell */
-.table-container th:last-child {
+.table-history-container th:last-child {
   border-top-right-radius: 10px;
 }
 
-.table-container tr {
+.table-history-container tr {
   background-color: #ffffff;
   transition: background-color 0.2s ease;
 }
 
-.table-container tr:nth-child(even) {
+.table-history-container tr:nth-child(even) {
   background-color: #f8f9fa;
 }
 
-.table-container tr:hover {
-  background-color: #f2f3f5;
+.table-history-container tr:hover {
+  background-color: #f5f5f5;
 }
 
 /* Rounded corners for the first data cell in each row */
-.table-container tr td:first-child {
+.table-history-container tr td:first-child {
   border-bottom-left-radius: 10px;
 }
 
 /* Rounded corners for the last data cell in each row */
-.table-container tr td:last-child {
+.table-history-container tr td:last-child {
   border-bottom-right-radius: 10px;
 }
 
-.table-container td {
-  padding: 14px;
+.table-history-container td {
+  padding: 14px 16px;
   color: #2b2b2b;
   border-bottom: 1px solid #eaeaea;
   font-weight: 500;
@@ -123,6 +110,6 @@
   text-align: center;
 }
 
-.table-container tr:not(:last-child) {
+.table-history-container tr:not(:last-child) {
   border-bottom: 1px solid #c9c9c9;
 }

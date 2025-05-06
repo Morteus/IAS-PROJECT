@@ -9,10 +9,17 @@ import {
   useLoggedInCountListener,
 } from "../databaseComponent";
 import "./Dashboard.css";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { db } from "../firebasedepc/Firebase"; // Update this import path
 
 // --- Hardcoded Total Capacity ---
 const TOTAL_PARKING_CAPACITY = 10;
 // ---
+
+// Add this function to format plate numbers
+const formatPlateNumber = (plateNumber) => {
+  return plateNumber ? plateNumber.toUpperCase() : "N/A";
+};
 
 function Dashboard() {
   // State for dashboard data
@@ -26,6 +33,7 @@ function Dashboard() {
   // Removed totalCapacity state, using constant instead
   // const [totalCapacity, setTotalCapacity] = useState(10);
   const [availableSlots, setAvailableSlots] = useState(TOTAL_PARKING_CAPACITY); // Default to hardcoded capacity
+  const [activeUsers, setActiveUsers] = useState([]);
 
   // Loading state to track different asynchronous operations
   const [loadingStatus, setLoadingStatus] = useState({
@@ -163,6 +171,22 @@ function Dashboard() {
     };
   }, []); // Empty dependency array ensures this runs only once on mount
 
+  // Effect 5: Listen for active users and update available slots
+  useEffect(() => {
+    const activeUsersQuery = query(
+      collection(db, "history"),
+      where("LOGGED_OUT", "==", null)
+    );
+
+    const unsubscribe = onSnapshot(activeUsersQuery, (snapshot) => {
+      const users = snapshot.docs.map((doc) => doc.data());
+      setActiveUsers(users);
+      setAvailableSlots(TOTAL_PARKING_CAPACITY - users.length);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   // --- Loading State ---
   if (isLoading) {
     // return <div>Loading dashboard data...</div>; // Still optional
@@ -203,7 +227,7 @@ function Dashboard() {
                   {historyData.length > 0 ? (
                     historyData.map((item) => (
                       <tr key={item.id}>
-                        <td>{item.Platenumber || "N/A"}</td>
+                        <td>{formatPlateNumber(item.Platenumber)}</td>
                         <td>{item.Name || "N/A"}</td>
                       </tr>
                     ))
@@ -237,7 +261,9 @@ function Dashboard() {
                   <label>Name:</label>
                   <span>{latestLogin.Name || "N/A"}</span>
                   <label>Plate Number:</label>
-                  <span>{latestLogin.Platenumber || "N/A"}</span>
+                  <span>
+                    {(latestLogin.Platenumber || "N/A").toUpperCase()}
+                  </span>
                   <label>Date:</label>
                   <span>
                     {latestLogin.LOGGED_IN?.toDate().toLocaleDateString() ??
@@ -268,7 +294,9 @@ function Dashboard() {
                   <label>Name:</label>
                   <span>{latestLogout.Name || "N/A"}</span>
                   <label>Plate Number:</label>
-                  <span>{latestLogout.Platenumber || "N/A"}</span>
+                  <span>
+                    {(latestLogout.Platenumber || "N/A").toUpperCase()}
+                  </span>
                   <label>Date:</label>
                   <span>
                     {latestLogout.LOGGED_OUT?.toDate().toLocaleDateString() ??
@@ -296,6 +324,9 @@ function Dashboard() {
               <div className="count-display">
                 {`${availableSlots} / ${TOTAL_PARKING_CAPACITY}`}
               </div>
+              {availableSlots === 0 && (
+                <p className="warning-text">Parking is currently full</p>
+              )}
             </div>
 
             {/* --- Box 5: Vehicles Currently In --- */}

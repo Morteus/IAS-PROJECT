@@ -134,6 +134,20 @@ ul label {
   margin-bottom: 20px;
   border-top: 1px solid #404040;
   padding-top: 20px;
+  cursor: pointer;
+}
+
+.logout .a:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+.logout .fa-icon {
+  color: #ff4444;
+}
+
+.logout:hover .fa-icon {
+  color: #ff4444;
 }
 
 .logout ul {
@@ -144,3 +158,96 @@ ul label {
   width: 100%;
   overflow-x: hidden; /* Prevent horizontal scroll */
 }
+
+.logout-confirm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100000 !important; /* Highest z-index */
+  backdrop-filter: blur(4px);
+}
+
+.logout-confirm-modal {
+  background: white;
+  padding: 32px;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.logout-confirm-modal h3 {
+  color: #232323;
+  margin: 0 0 16px 0;
+  font-size: 1.5em;
+  font-weight: 600;
+}
+
+.logout-confirm-modal p {
+  color: #666;
+  margin: 0 0 24px 0;
+  font-size: 1.1em;
+}
+
+.logout-confirm-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.logout-confirm-buttons button {
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 1em;
+  transition: all 0.2s ease;
+  min-width: 120px;
+}
+
+.logout-confirm-buttons button.confirm {
+  background: #e0e0e0;
+  color: #333;
+}
+
+.logout-confirm-buttons button.cancel {
+  background: #232323;
+  color: white;
+  font-weight: 600;
+}
+
+.logout-confirm-buttons button.cancel:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.logout-confirm-buttons button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.logout-confirm-buttons button:active {
+  transform: scale(0.98);
+}
+
+/* Remove duplicate modal styles and only keep logout-specific ones */
+/* Remove or comment out any .modal-overlay styles */

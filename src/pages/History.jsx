@@ -59,51 +59,45 @@ function History() {
   };
 
   return (
-    <Fragment>
-      <div className="main-content">
-        <div className="title">
-          <label htmlFor="">HISTORY</label>
-        </div>
-
-        <div className="history-container">
-          <div className="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Name</th>
-                  <th>Plate Number</th>
-                  <th>Logged In</th>
-                  <th>Logged Out</th>
-                  <th>Total Time</th>
-                </tr>
-              </thead>
-              <tbody>
-                {historyData.map((item) => {
-                  const loggedIn = item.LOGGED_IN
-                    ? item.LOGGED_IN.toDate()
-                    : null;
-                  const loggedOut = item.LOGGED_OUT
-                    ? item.LOGGED_OUT.toDate()
-                    : null;
-
-                  return (
-                    <tr key={item.id}>
-                      <td>{item.ID || "N/A"}</td>
-                      <td>{item.Name || "N/A"}</td>
-                      <td>{item.Platenumber || "N/A"}</td>
-                      <td>{loggedIn ? loggedIn.toLocaleString() : "N/A"}</td>
-                      <td>{loggedOut ? loggedOut.toLocaleString() : "N/A"}</td>
-                      <td>{formatTotalTime(loggedIn, loggedOut)}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
+    <div className="main-content">
+      <div className="title">
+        <label>HISTORY</label>
       </div>
-    </Fragment>
+
+      <div className="table-history-container">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Plate Number</th>
+              <th>Logged In</th>
+              <th>Logged Out</th>
+              <th>Total Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            {historyData.map((item) => {
+              const loggedIn = item.LOGGED_IN ? item.LOGGED_IN.toDate() : null;
+              const loggedOut = item.LOGGED_OUT
+                ? item.LOGGED_OUT.toDate()
+                : null;
+
+              return (
+                <tr key={item.id}>
+                  <td>{item.ID || "N/A"}</td>
+                  <td>{item.Name || "N/A"}</td>
+                  <td>{(item.Platenumber || "N/A").toUpperCase()}</td>
+                  <td>{loggedIn ? loggedIn.toLocaleString() : "N/A"}</td>
+                  <td>{loggedOut ? loggedOut.toLocaleString() : "N/A"}</td>
+                  <td>{formatTotalTime(loggedIn, loggedOut)}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }
 
