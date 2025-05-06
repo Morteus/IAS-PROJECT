@@ -60,6 +60,16 @@
   border-radius: 10px;
 }
 
+/* Password Box Icon Styling */
+.password-box .fa-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #888;
+}
+
 /* Logo Container */
 .logo-container {
   flex: 1;
@@ -78,6 +88,35 @@ button {
   font-size: 1.5rem;
 }
 
+/* Button Hover Effect */
+button:hover {
+  background-color: #444;
+  cursor: pointer;
+}
+
 button:active {
   scale: 0.95;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .login-container {
+    flex-direction: column;
+    height: auto;
+    width: 90%;
+  }
+
+  .logo-container {
+    border-radius: 0 0 20px 20px;
+    padding: 20px;
+  }
+
+  .input-container {
+    padding: 20px;
+  }
+
+  button {
+    font-size: 1.2rem;
+    height: 50px;
+  }
 }

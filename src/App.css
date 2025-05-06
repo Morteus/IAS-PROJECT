@@ -1,8 +1,8 @@
 .main-content {
-  height: 100vh; /* Use 100vh to take full viewport height */
-  width: calc(100% - 190px); /* Adjust width to account for the navbar */
+  height: 100vh; /* This might be causing overflow */
+  width: calc(100% - 190px);
   margin-left: 190px;
   display: flex;
   flex-direction: column;
-  overflow-y: scroll;
+  overflow-y: scroll; /* Combined with 100vh, this forces scrolling */
 }

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import "./Login.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
@@ -36,7 +36,17 @@ function Login() {
         <div className="input-container">
           <h1>Login</h1>
           <form onSubmit={handleSubmit}>
-            {error && <div style={{ color: "red" }}>{error}</div>}
+            {error && (
+              <div
+                style={{
+                  color: "red",
+                  marginBottom: "10px",
+                  fontWeight: "bold",
+                }}
+              >
+                {error}
+              </div>
+            )}
             <div className="input-container-child">
               <label htmlFor="username">Username</label>
               <input
@@ -46,7 +56,7 @@ function Login() {
                 onChange={(e) => setUsername(e.target.value)}
               />
               <label htmlFor="password">Password</label>
-              <div className="password-box">
+              <div className="password-box" style={{ position: "relative" }}>
                 <input
                   placeholder="Password"
                   type={displayPassword ? "text" : "password"}
@@ -60,6 +70,17 @@ function Login() {
                 />
               </div>
               <button type="submit">Login</button>
+              <a
+                href="/forgot-password"
+                style={{
+                  marginTop: "10px",
+                  display: "block",
+                  color: "#2b2b2b",
+                  textDecoration: "none",
+                }}
+              >
+                Forgot Password?
+              </a>
             </div>
           </form>
         </div>
