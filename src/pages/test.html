@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login/Logout</title>
+</head>
+
+<body>
+    <input type="text" name="" id="ID">
+    <button id="toggle-btn">Login</button>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js";
+        import {
+            getFirestore,
+            collection,
+            addDoc,
+            serverTimestamp,
+            query,
+            where,
+            getDocs,
+            updateDoc,
+            doc,
+            Timestamp
+        } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-firestore.js";
+
+        // Your Firebase configuration (same as before)
+        const firebaseConfig = {
+            apiKey: "AIzaSyD1mo1I8KEXOWrrbad_ITE0z-wM5fIueDY",
+            authDomain: "iasdb-b56c8.firebaseapp.com",
+            projectId: "iasdb-b56c8",
+            storageBucket: "iasdb-b56c8.firebasestorage.app",
+            messagingSenderId: "1035364535383",
+            appId: "1:1035364535383:web:504911504c73d52fe86712",
+            measurementId: "G-WY6WMMN571",
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Function to check if a user is currently logged in
+        async function isUserLoggedIn(userId) {
+            const q = query(
+                collection(db, "history"),
+                where("ID", "==", userId),
+                where("LOGGED_OUT", "==", null)
+            );
+            const querySnapshot = await getDocs(q);
+            return !querySnapshot.empty;
+        }
+
+        // Function to add a new login entry to the "history" collection
+        async function logLogin(userId) {
+            try {
+                const docRef = await addDoc(collection(db, "history"), {
+                    ID: userId,
+                    LOGGED_IN: serverTimestamp(),
+                    LOGGED_OUT: null,
+                    TotalTime: null,
+                });
+                console.log("Document written with ID: ", docRef.id);
+                alert("Logged in entry created successfully!");
+                return docRef.id;
+            } catch (e) {
+                console.error("Error adding document: ", e);
+                alert("Error creating logged in entry. Check console for details.");
+                return null;
+            }
+        }
+
+        // Function to log out a user by updating the LOGGED_OUT and TotalTime fields
+        async function logLogout(userId) {
+            try {
+                const q = query(
+                    collection(db, "history"),
+                    where("ID", "==", userId),
+                    where("LOGGED_OUT", "==", null)
+                );
+
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    console.log("No active login found for this user.");
+                    alert("No active login found for this user.");
+                    return;
+                }
+
+                const docToUpdate = querySnapshot.docs[0];
+                const docRef = doc(db, "history", docToUpdate.id);
+                const loginData = docToUpdate.data();
+
+                const loggedInTimestamp = loginData.LOGGED_IN;
+                const loggedOutTimestamp = serverTimestamp();
+
+                const totalTime = await calculateTotalTime(loggedInTimestamp, loggedOutTimestamp);
+
+                await updateDoc(docRef, {
+                    LOGGED_OUT: loggedOutTimestamp,
+                    TotalTime: totalTime,
+                });
+
+                console.log("Logout successful for user:", userId);
+                alert("Logout successful!");
+            } catch (error) {
+                console.error("Error during logout:", error);
+                alert("Error during logout. Check console for details.");
+            }
+        }
+
+        // Function to calculate the total time in hours:minutes:seconds format
+        async function calculateTotalTime(loggedInTimestamp, loggedOutTimestamp) {
+            const loggedInDate = loggedInTimestamp.toDate();
+            const loggedOutDate = new Date();
+            const timeDifference = loggedOutDate.getTime() - loggedInDate.getTime(); // Time difference in milliseconds
+
+            // Convert milliseconds to total seconds
+            const totalSeconds = Math.floor(timeDifference / 1000);
+
+            // Calculate hours, minutes, and seconds
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+
+            // Format as "HH:mm:ss"
+            const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            return formattedTime;
+        }
+
+
+
+        // Get references to the button and input
+        const toggleButton = document.getElementById("toggle-btn");
+        const userIdInput = document.getElementById("ID");
+
+        // Toggle button event listener
+        toggleButton.addEventListener("click", async () => {
+            const userId = userIdInput.value.trim();
+            if (userId) {
+                const loggedIn = await isUserLoggedIn(userId);
+                if (loggedIn) {
+                    await logLogout(userId);
+                    toggleButton.textContent = "Login"; // Change button text to "Login"
+                } else {
+                    await logLogin(userId);
+                    toggleButton.textContent = "Logout"; // Change button text to "Logout"
+                }
+            } else {
+                alert("Please enter a user ID.");
+            }
+        });
+    </script>
+</body>
+
+</html>

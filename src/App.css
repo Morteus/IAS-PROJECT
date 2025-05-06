@@ -1,8 +1,10 @@
 .main-content {
-  height: 100vh; /* This might be causing overflow */
-  width: calc(100% - 190px);
-  margin-left: 190px;
+  height: 100%;
+  width: calc(100% - 250px); /* Adjusted from 190px */
+  margin-left: 250px; /* Adjusted from 190px */
   display: flex;
   flex-direction: column;
-  overflow-y: scroll; /* Combined with 100vh, this forces scrolling */
+  overflow-y: auto; /* Change from scroll to auto */
+  padding: 0 20px; /* Add horizontal padding */
+  box-sizing: border-box; /* Ensure padding is included in width calculation */
 }

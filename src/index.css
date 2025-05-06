@@ -1,10 +1,21 @@
 * {
   font-family: "roboto";
 }
-.App {
-  height: 100vh;
-  width: 100vw;
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Prevent double scrollbars */
 }
+
+.App {
+  height: 100%;
+  display: flex;
+}
+
 body {
   margin: 0px;
   padding: 0px;

@@ -1,112 +1,127 @@
 .a {
+  width: 100%;
+  min-width: 0; /* Allow links to shrink */
   text-decoration: none;
-
   display: flex;
-
-  padding: 10px;
+  align-items: center;
+  padding: 12px 16px; /* Add more horizontal padding */
+  color: white;
 }
 
 .nav {
   height: 100%;
-  max-height: 100vh; /* Add this line */
-  overflow-y: auto; /* Add this line */
-  width: 190px;
+  width: 250px; /* Increased from 190px */
+  min-width: 250px; /* Match new width */
   background-color: #2b2b2b;
-  padding: 10px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   position: fixed;
+  overflow-x: hidden; /* Prevent horizontal scroll */
+  overflow-y: auto;
 }
+
+/* Consistent scrollbar styling */
 .nav::-webkit-scrollbar {
-  display: none;
+  width: 6px;
+}
+
+.nav::-webkit-scrollbar-track {
+  background: #232323;
+  border-radius: 3px;
+}
+
+.nav::-webkit-scrollbar-thumb {
+  background: #404040;
+  border-radius: 3px;
 }
 
 #userNameLabel {
-  font-weight: 200;
-  font-size: 0.9rem;
-  color: white;
+  font-size: 0.85rem;
+  color: #b3b3b3;
+  font-weight: 400;
 }
+
 .info {
   display: flex;
+  align-items: center;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #404040;
 }
+
 .imagecont {
   background-color: white;
-  height: fit-content;
-  width: fit-content;
+  padding: 8px;
   border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 10px;
+  margin-right: 12px;
 }
+
 .info img {
-  height: 50px;
-  width: 50px;
+  height: 40px;
+  width: 40px;
+  display: block;
 }
 
 .infocont-child {
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
+  gap: 4px;
 }
+
 .infocont-child label {
   color: white;
   font-weight: 500;
 }
+
 ul {
-  padding: 0px;
-  margin-top: 50px;
-  position: relative;
-  width: inherit;
+  margin: 30px 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
+  gap: 8px;
 }
+
 li {
-  display: flex;
-  padding: 10px;
+  width: 100%;
+  min-width: 0; /* Allow list items to shrink */
+  position: relative;
+  overflow: hidden;
   border-radius: 10px;
-  list-style: none;
-  min-width: inherit;
-  z-index: 0;
-  cursor: pointer;
-  position: relative; /* Add this line */
-  overflow: hidden; /* Add this line */
+  transition: background-color 0.2s ease;
 }
+
 li::after {
   content: "";
-  border-radius: 10px; /* Changed to match li border-radius */
-  height: 100%;
-  width: 0px;
-  background: white;
   position: absolute;
+  inset: 0;
+  background: white;
+  opacity: 0;
+  transition: opacity 0.2s ease;
   z-index: -1;
-  top: 0;
-  left: 0;
-  transition: width 100ms ease-in-out; /* Added width to the transition */
 }
 
 li:hover::after {
-  width: 100%;
+  opacity: 1;
 }
 
 li .fa-icon {
-  margin-right: 10px;
-  height: 1.2rem;
-  width: 1.2rem;
+  width: 20px;
+  height: 20px;
+  margin-right: 16px; /* Increased from 12px */
   color: #b3b3b3;
+  transition: color 0.2s ease;
 }
 
 li .a label {
-  font-size: 1.2rem;
-  color: white;
-}
-li:hover .fa-icon {
-  color: #2b2b2b; /* Change icon color on hover */
+  font-size: 1rem;
+  color: #ffffff;
+  transition: color 0.2s ease;
+  cursor: pointer;
 }
 
-li:hover a label {
-  color: #2b2b2b; /* Change label color on hover */
-  font-weight: 500;
+li:hover .fa-icon,
+li:hover .a label {
+  color: #2b2b2b;
 }
 
 ul label {
@@ -115,6 +130,17 @@ ul label {
 }
 
 .logout {
-  margin-top: auto; /* Push the logout to the bottom */
-  margin-bottom: 50px;
+  margin-top: auto;
+  margin-bottom: 20px;
+  border-top: 1px solid #404040;
+  padding-top: 20px;
+}
+
+.logout ul {
+  margin: 0;
+}
+
+.navigationlinks {
+  width: 100%;
+  overflow-x: hidden; /* Prevent horizontal scroll */
 }

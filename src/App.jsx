@@ -6,6 +6,8 @@ import Dashboard from "./pages/Dashboard";
 import History from "./pages/History";
 import NavBar from "./components/navigationBar";
 import Login from "./pages/Login";
+import LoginLogout from "./pages/LoginLogout";
+import Manual from "./pages/Manual";
 
 function App() {
   return (
@@ -35,6 +37,28 @@ function App() {
             </>
           }
         />
+
+        {/* Manual Route (With NavBar) */}
+        <Route
+          path="/Manual"
+          element={
+            <>
+              <NavBar />
+              <Manual />
+            </>
+          }
+        />
+
+        <Route
+          path="/LoginLogout" // Changed from login-logout to match navigation
+          element={
+            <>
+              <NavBar />
+              <LoginLogout />
+            </>
+          }
+        />
+
         {/* Default route */}
         <Route path="/" element={<Login />} />
       </Routes>

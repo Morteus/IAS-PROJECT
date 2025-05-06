@@ -17,55 +17,68 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: 100%;
-  padding: 30px;
-  overflow: auto; /* Changed from hidden to auto */
-}
-
-/* Hide scrollbar for WebKit browsers (Chrome, Safari, Edge) */
-.history-container::-webkit-scrollbar {
-  width: 0px; /* Set width to 0 to hide */
-  background: transparent; /* Optional: make the track transparent */
-}
-
-/* Hide scrollbar for IE and Edge */
-.history-container {
-  -ms-overflow-style: none; /* Hide the scrollbar */
-}
-
-/* Hide scrollbar for Firefox */
-.history-container {
-  scrollbar-width: none; /* Hide the scrollbar */
+  height: calc(100vh - 100px);
+  padding: 20px;
+  overflow: hidden;
 }
 
 .table-container {
-  overflow-y: auto;
-  flex-grow: 1;
-  box-shadow: 5px 5px 10px rgb(160, 160, 160);
-  border-radius: 10px;
-  display: flex;
-  flex-direction: column;
-  padding: 0px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: auto; /* Change from hidden to auto */
+  height: 100%;
+  margin: 0;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  border: 1px solid #eaeaea;
+  padding-right: 15px; /* Increased padding to prevent content overlap */
+}
+
+/* Remove all webkit scrollbar hiding */
+/* Delete these sections as they're causing issues */
+.table-container::-webkit-scrollbar,
+.history-container::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.table-container::-webkit-scrollbar-track,
+.history-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.table-container::-webkit-scrollbar-thumb,
+.history-container::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.table-container:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
 }
 
 .table-container table {
   margin: 0;
   padding: 0;
-  width: 100%;
+  width: calc(100% - 15px); /* Subtract padding to prevent horizontal scroll */
   border-collapse: collapse;
-}
-
-.table-container tbody {
-  padding-top: 0px;
+  border-radius: 12px;
 }
 
 .table-container th {
   position: sticky;
   top: 0;
-  background-color: #2b2b2b;
-  color: white;
-  height: 40px;
+  background: #232323;
+  color: #fff;
+  font-family: "Poppins", sans-serif;
+  font-size: 1em;
+  font-weight: 700;
+  padding: 15px;
   text-align: center;
+  height: auto;
+  border-bottom: 1px solid #eaeaea;
 }
 
 /* Rounded corners for the first header cell */
@@ -79,7 +92,16 @@
 }
 
 .table-container tr {
-  background-color: #f0f0f0;
+  background-color: #ffffff;
+  transition: background-color 0.2s ease;
+}
+
+.table-container tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+.table-container tr:hover {
+  background-color: #f2f3f5;
 }
 
 /* Rounded corners for the first data cell in each row */
@@ -93,9 +115,12 @@
 }
 
 .table-container td {
-  font-size: 1rem;
+  padding: 14px;
+  color: #2b2b2b;
+  border-bottom: 1px solid #eaeaea;
+  font-weight: 500;
+  font-size: 0.95em;
   text-align: center;
-  padding: 10px;
 }
 
 .table-container tr:not(:last-child) {

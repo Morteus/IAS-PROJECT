@@ -191,39 +191,38 @@ function Dashboard() {
               <div className="cardtitle">
                 <label>History</label>
               </div>
-              <div className="table-container">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Plate Number</th>
-                      <th>Name</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {historyData.length > 0 ? (
-                      historyData.map((item) => (
-                        <tr key={item.id}>
-                          <td>{item.Platenumber || "N/A"}</td>
-                          <td>{item.Name || "N/A"}</td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td
-                          colSpan="2"
-                          style={{
-                            textAlign: "center",
-                            padding: "20px",
-                            color: "#777",
-                          }}
-                        >
-                          No history records found.
-                        </td>
+
+              <table>
+                <thead>
+                  <tr>
+                    <th>Plate Number</th>
+                    <th>Name</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {historyData.length > 0 ? (
+                    historyData.map((item) => (
+                      <tr key={item.id}>
+                        <td>{item.Platenumber || "N/A"}</td>
+                        <td>{item.Name || "N/A"}</td>
                       </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
+                    ))
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan="2"
+                        style={{
+                          textAlign: "center",
+                          padding: "20px",
+                          color: "#777",
+                        }}
+                      >
+                        No history records found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
 
             {/* Box 2: Latest Logged In */}
