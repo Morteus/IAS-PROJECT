@@ -1,10 +1,28 @@
+:root {
+  --sidebar-width: 250px;
+  --content-padding: 20px;
+}
+
 .main-content {
   height: 100%;
-  width: calc(100% - 250px); /* Adjusted from 190px */
-  margin-left: 250px; /* Adjusted from 190px */
+  width: calc(100% - var(--sidebar-width));
+  margin-left: var(--sidebar-width);
   display: flex;
   flex-direction: column;
-  overflow-y: auto; /* Change from scroll to auto */
-  padding: 0 20px; /* Add horizontal padding */
-  box-sizing: border-box; /* Ensure padding is included in width calculation */
+  overflow-y: auto;
+  padding: 0 var(--content-padding);
+  box-sizing: border-box;
+  /* Removed transition property */
+}
+
+@media (max-width: 768px) {
+  :root {
+    --sidebar-width: 0;
+    --content-padding: 16px;
+  }
+
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+  }
 }

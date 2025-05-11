@@ -1,11 +1,12 @@
 import React, { createContext, useContext, useState } from "react";
 
-const ModalContext = createContext();
+const ModalContext = createContext(null);
 
 export const ModalProvider = ({ children }) => {
   const [modalContent, setModalContent] = useState(null);
 
   const openModal = (content) => {
+    if (!content) return;
     setModalContent(content);
   };
 
@@ -17,12 +18,18 @@ export const ModalProvider = ({ children }) => {
     <ModalContext.Provider value={{ openModal, closeModal }}>
       {children}
       {modalContent && (
-        <div className="logout-confirm-overlay">
-          <div className="logout-confirm-modal">{modalContent}</div>
+        <div className="global-modal-overlay">
+          <div className="global-modal-content">{modalContent}</div>
         </div>
       )}
     </ModalContext.Provider>
   );
 };
 
-export const useModal = () => useContext(ModalContext);
+export const useModal = () => {
+  const context = useContext(ModalContext);
+  if (!context) {
+    throw new Error("useModal must be used within a ModalProvider");
+  }
+  return context;
+};

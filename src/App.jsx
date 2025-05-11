@@ -1,6 +1,6 @@
 // src/App.jsx
 import React from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import "./App.css";
 import Dashboard from "./pages/Dashboard";
 import History from "./pages/History";
@@ -10,59 +10,53 @@ import LoginLogout from "./pages/LoginLogout";
 import Manual from "./pages/Manual";
 import { ModalProvider } from "./context/ModalContext";
 
+// Layout component for pages with NavBar
+const WithNavBar = ({ children }) => (
+  <>
+    <NavBar />
+    {children}
+  </>
+);
+
 function App() {
   return (
     <ModalProvider>
       <BrowserRouter>
         <Routes>
-          {/* Login Route (No NavBar) */}
-          <Route path="/Login" element={<Login />} />
-
-          {/* Dashboard Route (With NavBar) */}
+          <Route path="/login" element={<Login />} />
           <Route
-            path="/Dashboard"
+            path="/dashboard"
             element={
-              <>
-                <NavBar />
+              <WithNavBar>
                 <Dashboard />
-              </>
+              </WithNavBar>
             }
           />
-
-          {/* History Route (With NavBar) */}
           <Route
-            path="/History"
+            path="/history"
             element={
-              <>
-                <NavBar />
+              <WithNavBar>
                 <History />
-              </>
+              </WithNavBar>
             }
           />
-
-          {/* Manual Route (With NavBar) */}
           <Route
-            path="/Manual"
+            path="/manual"
             element={
-              <>
-                <NavBar />
+              <WithNavBar>
                 <Manual />
-              </>
+              </WithNavBar>
             }
           />
-
           <Route
-            path="/LoginLogout" // Changed from login-logout to match navigation
+            path="/loginlogout"
             element={
-              <>
-                <NavBar />
+              <WithNavBar>
                 <LoginLogout />
-              </>
+              </WithNavBar>
             }
           />
-
-          {/* Default route */}
-          <Route path="/" element={<Login />} />
+          <Route path="/" element={<Navigate to="/login" replace />} />
         </Routes>
       </BrowserRouter>
     </ModalProvider>

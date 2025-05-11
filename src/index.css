@@ -1,5 +1,5 @@
 * {
-  font-family: "roboto";
+  font-family: "Roboto", sans-serif; /* Add fallback font */
 }
 
 html,
@@ -16,55 +16,10 @@ body,
   display: flex;
 }
 
-body {
-  margin: 0px;
-  padding: 0px;
-  height: 100vh;
-  width: 100vw;
-}
-
-/* Global Modal Overlay Styles */
-/* .modal-overlay {
-  position: fixed !important;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5) !important;
-  display: flex !important;
-  justify-content: center;
-  align-items: center;
-  z-index: 99999 !important; 
-  pointer-events: all !important;
-  backdrop-filter: blur(4px);
-}
-
-.modal-content {
-  background: white;
-  padding: 32px;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 400px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  animation: modalFadeIn 0.3s ease;
-}
-
-@keyframes modalFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-} */
-
+/* Consolidate modal styles */
 .global-modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0; /* Shorthand for top/right/bottom/left: 0 */
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
@@ -74,6 +29,62 @@ body {
 }
 
 .global-modal-content {
-  position: relative;
-  z-index: 1000000;
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  /* Remove or comment out the box-shadow to eliminate the shadow inside the modal */
+  /* box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); */
+}
+
+.global-modal-content h3 {
+  margin: 0;
+  font-size: 1.5em;
+  color: #232323;
+  margin-bottom: 8px;
+}
+
+.global-modal-content p {
+  margin: 0;
+  color: #666;
+  margin-bottom: 24px;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end; /* Align buttons to the right */
+  margin-top: 24px;
+  padding: 0 12px;
+}
+
+.modal-button {
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: none;
+  min-width: 100px; /* Set minimum width for buttons */
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.9em;
+  transition: all 0.2s ease;
+}
+
+.modal-button.confirm {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.modal-button.cancel {
+  background-color: #232323;
+  color: white;
+}
+
+.modal-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.modal-button:active {
+  transform: translateY(0);
 }

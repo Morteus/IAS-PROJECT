@@ -32,24 +32,24 @@ function NavBar() {
 
   const handleLogoutClick = () => {
     openModal(
-      <>
+      <div>
         <h3>Confirm Logout</h3>
         <p>Are you sure you want to log out?</p>
-        <div className="logout-confirm-buttons">
-          <button className="cancel" onClick={closeModal}>
-            No
+        <div className="modal-buttons">
+          <button className="modal-button cancel" onClick={closeModal}>
+            Cancel
           </button>
           <button
-            className="confirm"
+            className="modal-button confirm"
             onClick={() => {
               confirmLogout();
               closeModal();
             }}
           >
-            Yes
+            Confirm
           </button>
         </div>
-      </>
+      </div>
     );
   };
 

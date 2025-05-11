@@ -1,11 +1,13 @@
 import React, { Fragment, useState, useEffect } from "react";
 import { fetchAllHistory } from "../databaseComponent";
+import { FaSearch } from "react-icons/fa";
 import "./History.css";
 
 function History() {
   const [historyData, setHistoryData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -58,10 +60,30 @@ function History() {
     return "N/A";
   };
 
+  const filteredHistory = historyData.filter((item) => {
+    const searchStr = searchTerm.toLowerCase();
+    return (
+      item.ID?.toString().toLowerCase().includes(searchStr) ||
+      item.Name?.toLowerCase().includes(searchStr) ||
+      item.Platenumber?.toLowerCase().includes(searchStr)
+    );
+  });
+
   return (
     <div className="main-content">
       <div className="title">
         <label>HISTORY</label>
+        <div className="search-container">
+          <FaSearch className="search-icon" />
+          <input
+            type="text"
+            s
+            className="search-input"
+            placeholder="Search by ID, Name, or Plate Number..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
       </div>
 
       <div className="table-history-container">
@@ -77,7 +99,7 @@ function History() {
             </tr>
           </thead>
           <tbody>
-            {historyData.map((item) => {
+            {filteredHistory.map((item) => {
               const loggedIn = item.LOGGED_IN ? item.LOGGED_IN.toDate() : null;
               const loggedOut = item.LOGGED_OUT
                 ? item.LOGGED_OUT.toDate()

@@ -212,10 +212,6 @@ function Dashboard() {
           <div className="gridcont">
             {/* Box 1: History */}
             <div className="box box-1">
-              <div className="cardtitle">
-                <label>History</label>
-              </div>
-
               <table>
                 <thead>
                   <tr>
@@ -225,7 +221,7 @@ function Dashboard() {
                 </thead>
                 <tbody>
                   {historyData.length > 0 ? (
-                    historyData.map((item) => (
+                    historyData.slice(0, 20).map((item) => (
                       <tr key={item.id}>
                         <td>{formatPlateNumber(item.Platenumber)}</td>
                         <td>{item.Name || "N/A"}</td>

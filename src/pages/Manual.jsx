@@ -38,6 +38,9 @@ function Manual() {
   const [showParkingFullModal, setShowParkingFullModal] = useState(false);
   const [entryGateStatus, setEntryGateStatus] = useState("Closed");
   const [exitGateStatus, setExitGateStatus] = useState("Closed");
+  const [gateError, setGateError] = useState({ entry: null, exit: null });
+  const [submitLoading, setSubmitLoading] = useState(false);
+  const [gateLoading, setGateLoading] = useState({ entry: false, exit: false });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -54,21 +57,27 @@ function Manual() {
     if (!formData.uid.trim()) {
       errors.uid = "UID is required";
       isValid = false;
-    } else if (!/^[A-Za-z0-9]+$/.test(formData.uid)) {
-      errors.uid = "UID must contain only letters and numbers";
+    } else if (!/^[A-Za-z0-9]{3,}$/.test(formData.uid)) {
+      errors.uid =
+        "UID must be at least 3 characters (letters and numbers only)";
       isValid = false;
     }
 
     if (!formData.name.trim()) {
       errors.name = "Name is required";
       isValid = false;
+    } else if (!/^[A-Za-z\s]{2,}$/.test(formData.name)) {
+      errors.name =
+        "Name must contain only letters and spaces (min 2 characters)";
+      isValid = false;
     }
 
     if (!formData.plateNumber.trim()) {
       errors.plateNumber = "Plate Number is required";
       isValid = false;
-    } else if (!/^[A-Za-z0-9\s-]+$/.test(formData.plateNumber)) {
-      errors.plateNumber = "Invalid plate number format";
+    } else if (!/^[A-Za-z0-9\s-]{2,}$/.test(formData.plateNumber)) {
+      errors.plateNumber =
+        "Invalid plate number format (letters, numbers, spaces, and hyphens only)";
       isValid = false;
     }
 
@@ -177,38 +186,54 @@ function Manual() {
       return;
     }
 
-    setIsLoading(true);
+    setSubmitLoading(true);
     try {
       const loggedIn = await isUserLoggedIn(formData.uid);
       if (loggedIn) {
-        setSubmitError(
-          `User with ID ${formData.uid} is already logged in. Please log them out first.`
-        );
-        setButtonText("Login");
-        return;
+        throw new Error(`User with ID ${formData.uid} is already logged in`);
       }
 
       await logLogin(formData);
       setButtonText("Logout");
       setFormData({ uid: "", name: "", plateNumber: "" });
       setFormErrors({});
-      setSubmitError(""); // Clear any existing error
     } catch (error) {
-      console.error("Error:", error);
-      setSubmitError("An error occurred. Please try again.");
+      setSubmitError(error.message || "An unexpected error occurred");
+      console.error("Submit error:", error);
     } finally {
-      setIsLoading(false);
+      setSubmitLoading(false);
     }
   };
 
-  const handleGateControl = (gate, action) => {
-    if (gate === "Entry") {
-      setEntryGateStatus(action === "Open" ? "Open" : "Closed");
-    } else {
-      setExitGateStatus(action === "Open" ? "Open" : "Closed");
+  const handleGateControl = async (gate, action) => {
+    const gateType = gate.toLowerCase();
+    setGateLoading((prev) => ({ ...prev, [gateType]: true }));
+    setGateError((prev) => ({ ...prev, [gateType]: null }));
+
+    try {
+      // Simulate gate operation with timeout
+      await new Promise((resolve, reject) => {
+        setTimeout(() => {
+          // Simulate random failure
+          if (Math.random() < 0.1) {
+            // 10% chance of failure
+            reject(new Error(`Failed to ${action.toLowerCase()} ${gate} gate`));
+          }
+          resolve();
+        }, 1500);
+      });
+
+      if (gate === "Entry") {
+        setEntryGateStatus(action === "Open" ? "Open" : "Closed");
+      } else {
+        setExitGateStatus(action === "Open" ? "Open" : "Closed");
+      }
+    } catch (error) {
+      setGateError((prev) => ({ ...prev, [gateType]: error.message }));
+      console.error(`Gate operation error:`, error);
+    } finally {
+      setGateLoading((prev) => ({ ...prev, [gateType]: false }));
     }
-    console.log(`${action}ing ${gate} gate`);
-    alert(`${gate} gate ${action.toLowerCase()}ing...`);
   };
 
   const handleLogoutClick = (user) => {
@@ -334,8 +359,12 @@ function Manual() {
                 )}
               </div>
               {submitError && <div className="submit-error">{submitError}</div>}
-              <button type="submit" disabled={isLoading}>
-                {isLoading ? "Processing..." : buttonText}
+              <button
+                type="submit"
+                disabled={submitLoading}
+                className={submitLoading ? "loading" : ""}
+              >
+                {submitLoading ? "Processing..." : buttonText}
               </button>
             </form>
           </div>
@@ -346,12 +375,17 @@ function Manual() {
               </div>
               <div className="gate-controls">
                 <button
-                  className="gate-button entry"
+                  className={`gate-button entry ${
+                    gateLoading.entry ? "loading" : ""
+                  }`}
                   onClick={() => handleGateControl("Entry", "Open")}
-                  disabled={entryGateStatus === "Open"}
+                  disabled={entryGateStatus === "Open" || gateLoading.entry}
                 >
-                  Open Gate
+                  {gateLoading.entry ? "Processing..." : "Open Gate"}
                 </button>
+                {gateError.entry && (
+                  <div className="gate-error">{gateError.entry}</div>
+                )}
                 <button
                   className="gate-button entry"
                   onClick={() => handleGateControl("Entry", "Close")}
@@ -374,12 +408,17 @@ function Manual() {
               </div>
               <div className="gate-controls">
                 <button
-                  className="gate-button exit"
+                  className={`gate-button exit ${
+                    gateLoading.exit ? "loading" : ""
+                  }`}
                   onClick={() => handleGateControl("Exit", "Open")}
-                  disabled={exitGateStatus === "Open"}
+                  disabled={exitGateStatus === "Open" || gateLoading.exit}
                 >
-                  Open Gate
+                  {gateLoading.exit ? "Processing..." : "Open Gate"}
                 </button>
+                {gateError.exit && (
+                  <div className="gate-error">{gateError.exit}</div>
+                )}
                 <button
                   className="gate-button exit"
                   onClick={() => handleGateControl("Exit", "Close")}

@@ -1,0 +1,28 @@
+.input-field {
+  transition: all 0.2s ease-in-out;
+}
+
+.input-field:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.input-field:focus {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  outline: none;
+}
+
+.input-container {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.input-label {
+  transition: all 0.2s ease;
+}
+
+.input-container:hover .input-label {
+  color: #232323;
+  transform: translateY(-2px);
+}
