@@ -308,8 +308,52 @@ const Settings = () => {
 
   const handlePasswordChange = async (e) => {
     e.preventDefault();
-    // TODO: Implement password change logic
-    alert("Password change functionality to be implemented");
+    if (!userId) {
+      alert("You must be logged in to change your password");
+      return;
+    }
+
+    // Validate passwords
+    if (passwords.newPassword !== passwords.confirmPassword) {
+      alert("New passwords do not match");
+      return;
+    }
+
+    if (passwords.newPassword.length < 6) {
+      alert("New password must be at least 6 characters long");
+      return;
+    }
+
+    try {
+      // Get current user document
+      const userDoc = await getDoc(doc(db, "Accounts", userId));
+      if (!userDoc.exists()) {
+        alert("User account not found");
+        return;
+      }
+
+      // Verify current password
+      if (userDoc.data().Password !== passwords.currentPassword) {
+        alert("Current password is incorrect");
+        return;
+      }
+
+      // Update password
+      await updateDoc(doc(db, "Accounts", userId), {
+        Password: passwords.newPassword,
+      });
+
+      alert("Password updated successfully!");
+      // Clear password fields
+      setPasswords({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    } catch (err) {
+      console.error("Error updating password:", err);
+      alert("Failed to update password. Please try again.");
+    }
   };
 
   const togglePasswordVisibility = (field) => {
@@ -478,31 +522,6 @@ const Settings = () => {
               </div>
             </section>
 
-            <section id="export" className="settings-section">
-              <div className="settings-card">
-                <div className="card-header">
-                  <h2>Export History</h2>
-                  <p>Download your parking history</p>
-                </div>
-                <div className="export-options">
-                  <button
-                    className="export-btn csv"
-                    onClick={() => handleExport("CSV")}
-                  >
-                    <FontAwesomeIcon icon={faFileDownload} />
-                    Export as CSV
-                  </button>
-                  <button
-                    className="export-btn pdf"
-                    onClick={() => handleExport("PDF")}
-                  >
-                    <FontAwesomeIcon icon={faFileDownload} />
-                    Export as PDF
-                  </button>
-                </div>
-              </div>
-            </section>
-
             <section id="security" className="settings-section">
               <div className="settings-card">
                 <div className="card-header">
@@ -618,6 +637,31 @@ const Settings = () => {
                     </button>
                   </div>
                 </form>
+              </div>
+            </section>
+
+            <section id="export" className="settings-section">
+              <div className="settings-card">
+                <div className="card-header">
+                  <h2>Export History</h2>
+                  <p>Download your parking history</p>
+                </div>
+                <div className="export-options">
+                  <button
+                    className="export-btn csv"
+                    onClick={() => handleExport("CSV")}
+                  >
+                    <FontAwesomeIcon icon={faFileDownload} />
+                    Export as CSV
+                  </button>
+                  <button
+                    className="export-btn pdf"
+                    onClick={() => handleExport("PDF")}
+                  >
+                    <FontAwesomeIcon icon={faFileDownload} />
+                    Export as PDF
+                  </button>
+                </div>
               </div>
             </section>
           </div>
