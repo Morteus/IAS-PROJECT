@@ -8,6 +8,7 @@ import NavBar from "./components/navigationBar";
 import Login from "./pages/Login";
 import LoginLogout from "./pages/LoginLogout";
 import Manual from "./pages/Manual";
+import Settings from "./pages/Settings";
 import { ModalProvider } from "./context/ModalContext";
 
 // Layout component for pages with NavBar
@@ -56,6 +57,7 @@ function App() {
               </WithNavBar>
             }
           />
+          <Route path="/Settings" element={<Settings />} />
           <Route path="/" element={<Navigate to="/login" replace />} />
         </Routes>
       </BrowserRouter>

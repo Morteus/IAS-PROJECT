@@ -90,6 +90,14 @@ function NavBar() {
               <label htmlFor="manual">Manual</label>
             </Link>
           </li>
+          <li>
+            <Link to="/Settings" id="navigateToSettings" className="a">
+              <span role="img" aria-label="settings" className="fa-icon">
+                ⚙️
+              </span>
+              <label htmlFor="settings">Settings</label>
+            </Link>
+          </li>
         </ul>
       </div>
       <div className="logout">

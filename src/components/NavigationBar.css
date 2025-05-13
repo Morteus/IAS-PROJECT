@@ -9,16 +9,18 @@
 }
 
 .nav {
-  height: 100%;
-  width: 250px; /* Increased from 190px */
-  min-width: 250px; /* Match new width */
+  height: 100vh;
+  width: 250px;
+  min-width: 250px;
   background-color: #2b2b2b;
   padding: 20px;
   display: flex;
   flex-direction: column;
   position: fixed;
-  overflow-x: hidden; /* Prevent horizontal scroll */
+  left: 0;
+  top: 0;
   overflow-y: auto;
+  z-index: 1000;
 }
 
 /* Consistent scrollbar styling */
