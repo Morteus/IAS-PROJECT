@@ -1,7 +1,5 @@
 import React, { useState } from "react";
-import { initializeApp } from "firebase/app";
 import {
-  getFirestore,
   collection,
   addDoc,
   serverTimestamp,
@@ -11,20 +9,8 @@ import {
   updateDoc,
   doc,
 } from "firebase/firestore";
+import { db } from "../firebasedepc/Firebase";
 import "./LoginLogout.css";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyD1mo1I8KEXOWrrbad_ITE0z-wM5fIueDY",
-  authDomain: "iasdb-b56c8.firebaseapp.com",
-  projectId: "iasdb-b56c8",
-  storageBucket: "iasdb-b56c8.firebasestorage.app",
-  messagingSenderId: "1035364535383",
-  appId: "1:1035364535383:web:504911504c73d52fe86712",
-  measurementId: "G-WY6WMMN571",
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
 
 function LoginLogout() {
   const [userId, setUserId] = useState("");

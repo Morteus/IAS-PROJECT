@@ -466,3 +466,25 @@
 }
 
 /* ...existing styles... */
+
+.connection-status {
+  font-size: 0.9rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin-left: auto;
+}
+
+.connection-status.connected {
+  color: #4caf50;
+}
+
+.connection-status.disconnected {
+  color: #f44336;
+}
+
+.control-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+/* ...existing styles... */

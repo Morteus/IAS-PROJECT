@@ -60,16 +60,6 @@
   border-radius: 10px;
 }
 
-/* Password Box Icon Styling */
-.password-box .fa-icon {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  cursor: pointer;
-  color: #888;
-}
-
 /* Logo Container */
 .logo-container {
   flex: 1;
@@ -88,35 +78,366 @@ button {
   font-size: 1.5rem;
 }
 
-/* Button Hover Effect */
-button:hover {
-  background-color: #444;
-  cursor: pointer;
-}
-
 button:active {
   scale: 0.95;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .login-container {
-    flex-direction: column;
-    height: auto;
-    width: 90%;
-  }
+.centered-text {
+  text-align: center;
+}
 
-  .logo-container {
-    border-radius: 0 0 20px 20px;
-    padding: 20px;
-  }
+/* Login.css */
 
-  .input-container {
-    padding: 20px;
-  }
+/* ... other styles ... */
 
-  button {
-    font-size: 1.2rem;
-    height: 50px;
+.terms-and-conditions {
+  /* Add any other styling you want for the text */
+}
+
+.centered-text {
+  text-align: center; /* This will center the text horizontally */
+}
+
+.clickable-text {
+  cursor: pointer; /* Changes the cursor to a pointer on hover */
+  color: blue; /* Example styling to indicate it's clickable */
+  text-decoration: underline; /* Another way to indicate it's clickable */
+}
+
+.modal {
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: 5% auto; /* Adjust margin for better centering on different screen heights */
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%; /* Could be more or less, depending on screen size */
+  max-height: 90%; /* Ensure modal doesn't exceed viewport height */
+  overflow-y: auto; /* Enable vertical scrolling for long content */
+  position: relative; /* To position the close button and actions */
+  display: flex;
+  flex-direction: column; /* Arrange content and button vertically */
+}
+
+.close-button {
+  color: #aaa;
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close-button:hover,
+.close-button:focus {
+  color: black;
+  text-decoration: none;
+}
+
+/* Add fade-in animation */
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
   }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Basic modal styling */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Ensure it's on top of other content */
+}
+
+.modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  width: 80%; /* Adjust as needed */
+  max-height: 90%; /* Adjust as needed */
+  overflow: auto; /* For scrollable content in the first modal */
+  position: relative; /* For close button positioning */
+}
+
+.modal-content.rounded-corners {
+  border-radius: 8px;
+}
+
+.modal-content.scrollable-content {
+  overflow-y: auto;
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 20px;
+  font-weight: bold;
+  color: #aaa;
+  cursor: pointer;
+}
+
+.close-button:hover {
+  color: black;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end; /* Align buttons to the right */
+  margin-top: 20px;
+}
+
+.modal-actions button {
+  padding: 10px 15px;
+  margin-left: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.next-button {
+  background-color: #007bff; /* Example color */
+  color: white;
+}
+
+.agree-button {
+  background-color: #28a745; /* Example color */
+  color: white;
+}
+
+.disagree-button {
+  background-color: #dc3545; /* Example color */
+  color: white;
+}
+
+/* Fade-in animation */
+.modal.fade-in {
+  opacity: 0;
+  animation: fadeIn 0.3s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Style for the disabled login button */
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Styles for the modal container */
+.modal {
+  position: fixed;
+  z-index: 1050;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.2s ease-out;
+}
+
+.modal.fade-in {
+  opacity: 1;
+}
+
+/* Styles for the modal content wrapper */
+.modal-content {
+  background-color: #fff;
+  margin: 2rem auto;
+  padding: 30px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 550px;
+  max-height: 85vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  transform: translateY(-20px);
+  opacity: 0;
+  transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+}
+
+.modal.fade-in .modal-content {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.modal-content.rounded-corners {
+  border-radius: 8px;
+}
+
+.modal-content.scrollable-content {
+  overflow-y: auto;
+}
+
+/* Styles for the modal header */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 1.5rem;
+}
+
+.modal-title {
+  margin-bottom: 0;
+  font-size: 1.75rem;
+  font-weight: 500;
+  color: #212529;
+}
+
+/* Styles for the close button */
+.close-button {
+  color: #757575;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  font-weight: normal;
+  opacity: 0.8;
+  cursor: pointer;
+  padding: 0;
+  appearance: none;
+  line-height: 1;
+}
+
+.close-button:hover {
+  opacity: 1;
+  color: #000;
+  text-decoration: none;
+}
+
+/* Styles for the modal actions (buttons container) */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e0e0e0;
+  margin-top: 1.5rem;
+}
+
+/* Styles for buttons within the modal actions */
+.modal-actions button {
+  padding: 0.8rem 1.5rem;
+  margin-left: 0.75rem;
+  border-radius: 6px;
+  font-size: 1.05rem;
+  line-height: 1.5;
+  font-weight: 400;
+  transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out,
+    box-shadow 0.15s ease-in-out;
+}
+
+.next-button {
+  color: #fff;
+  background-color: #007bff;
+  border: 1px solid #007bff;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 123, 255, 0.25);
+}
+
+.next-button:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+  box-shadow: 0 0.25rem 0.5rem rgba(0, 123, 255, 0.4);
+}
+
+.agree-button {
+  color: #fff;
+  background-color: #28a745;
+  border: 1px solid #28a745;
+  box-shadow: 0 0.125rem 0.25rem rgba(40, 167, 69, 0.25);
+}
+
+.agree-button:hover {
+  background-color: #1e7e34;
+  border-color: #1c7430;
+  box-shadow: 0 0.25rem 0.5rem rgba(40, 167, 69, 0.4);
+}
+
+.disagree-button {
+  color: #fff;
+  background-color: #dc3545;
+  border: 1px solid #dc3545;
+  box-shadow: 0 0.125rem 0.25rem rgba(220, 53, 69, 0.25);
+}
+
+.disagree-button:hover {
+  background-color: #c82333;
+  border-color: #bd2130;
+  box-shadow: 0 0.25rem 0.5rem rgba(220, 53, 69, 0.4);
+}
+
+/* Styles for buttons within the modal actions */
+.modal-actions button {
+  padding: 0.8rem 1.5rem;
+  margin-left: 0.75rem;
+  border-radius: 6px;
+  font-size: 1.05rem;
+  line-height: 1.5;
+  font-weight: 400;
+  color: white; /* Set text color to white */
+  background-color: #2b2b2b; /* Match login button background */
+  border: 1px solid #2b2b2b; /* Match login button border */
+  transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out,
+    box-shadow 0.15s ease-in-out;
+}
+
+.next-button:hover {
+  background-color: #4d4d4d; /* Slightly darker hover */
+  border-color: #4d4d4d;
+  box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.2); /* Subtle shadow on hover */
+}
+
+.agree-button:hover {
+  background-color: #4d4d4d; /* Slightly darker hover */
+  border-color: #4d4d4d;
+  box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.2); /* Subtle shadow on hover */
+}
+
+.disagree-button:hover {
+  background-color: #4d4d4d; /* Slightly darker hover */
+  border-color: #4d4d4d;
+  box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.2); /* Subtle shadow on hover */
 }
