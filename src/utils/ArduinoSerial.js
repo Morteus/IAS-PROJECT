@@ -35,18 +35,14 @@ let dbInstance;
 
 async function initializeFirebase() {
   try {
-    // Fix: Use correct credential and databaseURL if needed
     if (!admin.apps.length) {
       firebaseApp = admin.initializeApp({
         credential: admin.credential.cert(serviceAccount),
-        // Uncomment and set your databaseURL if using Realtime Database
         // databaseURL: "https://iasdb-b56c8.firebaseio.com"
       });
     } else {
       firebaseApp = admin.apps[0];
     }
-
-    // Fix: Use getFirestore from admin.firestore (for v10+)
     dbInstance = admin.firestore();
     console.log("Firestore Admin SDK initialized successfully");
     return { db: dbInstance };
@@ -72,6 +68,8 @@ async function testFirestoreConnection(db) {
   }
 }
 
+const MAX_SLOTS = 10;
+
 // Handle serial connection
 function startSerialConnection(db) {
   try {
@@ -89,6 +87,8 @@ function startSerialConnection(db) {
 
     serialPort.on("open", () => {
       console.log("Serial port opened on COM9");
+      // Initialize slot count when serial connection is established
+      updateSlotCount(db);
     });
 
     parser.on("data", async (line) => {
@@ -96,84 +96,87 @@ function startSerialConnection(db) {
         console.log("Raw data received:", line);
 
         // Handle gate control acknowledgments
-        if (line.startsWith("GATE:")) {
+        if (line.startsWith("ACK:")) {
           console.log("Gate status:", line);
           return;
         }
 
-        if (line.startsWith("ENTRY") || line.startsWith("EXIT")) {
-          const parts = line.trim().split(",");
-          console.log("Parsed parts:", parts);
+        // Only try to parse lines that look like JSON
+        if (line.trim().startsWith("{") && line.trim().endsWith("}")) {
+          try {
+            const data = JSON.parse(line);
 
-          if (parts.length === 5) {
-            const [action, uid, name, plate, userId] = parts;
-            const isEntry = action === "ENTRY";
+            if (data.action === "ENTRY" || data.action === "EXIT") {
+              const isEntry = data.action === "ENTRY";
 
-            const historyData = {
-              ID: userId,
-              Name: name,
-              Platenumber: plate,
-              LOGGED_IN: isEntry
-                ? admin.firestore.FieldValue.serverTimestamp()
-                : null,
-              LOGGED_OUT: !isEntry
-                ? admin.firestore.FieldValue.serverTimestamp()
-                : null,
-              TotalTime: null, // Will be calculated on exit
-            };
+              const historyData = {
+                ID: data.userId,
+                Name: data.name,
+                Platenumber: data.plateNumber,
+                LOGGED_IN: isEntry
+                  ? admin.firestore.FieldValue.serverTimestamp()
+                  : null,
+                LOGGED_OUT: !isEntry
+                  ? admin.firestore.FieldValue.serverTimestamp()
+                  : null,
+                TotalTime: null,
+              };
 
-            try {
-              const historyRef = db.collection("history"); // Changed from "access_logs" to "history"
+              try {
+                const historyRef = db.collection("history");
 
-              if (isEntry) {
-                // Handle entry - Create document and update with its ID
-                const docRef = await historyRef.add(historyData);
-                await docRef.update({
-                  documentId: docRef.id, // Add document ID to the document itself
-                });
-                console.log(
-                  "Entry record created for:",
-                  name,
-                  "with ID:",
-                  docRef.id
-                );
-              } else {
-                // Handle exit - Find the matching entry record
-                const q = await historyRef
-                  .where("ID", "==", userId)
-                  .where("LOGGED_OUT", "==", null)
-                  .get();
+                if (isEntry) {
+                  const docRef = await historyRef.add(historyData);
+                  await docRef.update({ documentId: docRef.id });
+                  console.log(
+                    "Entry record created for:",
+                    data.name,
+                    "with ID:",
+                    docRef.id
+                  );
+                } else {
+                  const q = await historyRef
+                    .where("ID", "==", data.userId)
+                    .where("LOGGED_OUT", "==", null)
+                    .get();
 
-                if (!q.empty) {
-                  const docToUpdate = q.docs[0];
-                  const entryData = docToUpdate.data();
-                  const loggedInTime = entryData.LOGGED_IN.toDate();
-                  const loggedOutTime = new Date();
+                  if (!q.empty) {
+                    const docToUpdate = q.docs[0];
+                    const entryData = docToUpdate.data();
+                    const loggedInTime = entryData.LOGGED_IN.toDate();
+                    const loggedOutTime = new Date();
 
-                  // Calculate total time
-                  const timeDiff =
-                    loggedOutTime.getTime() - loggedInTime.getTime();
-                  const totalSeconds = Math.floor(timeDiff / 1000);
-                  const hours = Math.floor(totalSeconds / 3600);
-                  const minutes = Math.floor((totalSeconds % 3600) / 60);
-                  const seconds = totalSeconds % 60;
-                  const totalTime = `${hours
-                    .toString()
-                    .padStart(2, "0")}:${minutes
-                    .toString()
-                    .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+                    const timeDiff =
+                      loggedOutTime.getTime() - loggedInTime.getTime();
+                    const totalSeconds = Math.floor(timeDiff / 1000);
+                    const hours = Math.floor(totalSeconds / 3600);
+                    const minutes = Math.floor((totalSeconds % 3600) / 60);
+                    const seconds = totalSeconds % 60;
+                    const totalTime = `${hours
+                      .toString()
+                      .padStart(2, "0")}:${minutes
+                      .toString()
+                      .padStart(2, "0")}:${seconds
+                      .toString()
+                      .padStart(2, "0")}`;
 
-                  await docToUpdate.ref.update({
-                    LOGGED_OUT: admin.firestore.FieldValue.serverTimestamp(),
-                    TotalTime: totalTime,
-                  });
-                  console.log("Exit record updated for:", name);
+                    await docToUpdate.ref.update({
+                      LOGGED_OUT: admin.firestore.FieldValue.serverTimestamp(),
+                      TotalTime: totalTime,
+                    });
+                    console.log("Exit record updated for:", data.name);
+                  }
                 }
+              } catch (firestoreError) {
+                console.error("Firestore write error:", firestoreError);
               }
-            } catch (firestoreError) {
-              console.error("Firestore write error:", firestoreError);
             }
+          } catch (jsonError) {
+            console.error("Error parsing JSON:", jsonError, "Line:", line);
           }
+        } else {
+          // Optionally log or ignore non-JSON lines
+          // console.log("Non-JSON serial line:", line);
         }
       } catch (error) {
         console.error("Error processing serial data:", error);
@@ -187,8 +190,74 @@ function startSerialConnection(db) {
     serialPort.on("close", () => {
       console.log("Serial port closed");
     });
+
+    listenToGateCommands(db);
   } catch (error) {
     console.error("Serial port initialization error:", error);
+  }
+}
+
+function listenToGateCommands(db) {
+  // Listen for gate commands
+  db.collection("gate_commands")
+    .orderBy("timestamp", "desc")
+    .limit(1)
+    .onSnapshot((snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        if (change.type === "added") {
+          const data = change.doc.data();
+          const command = `${data.gate}_${data.action}\n`;
+          if (serialPort && serialPort.isOpen) {
+            serialPort.write(command, (err) => {
+              if (err) {
+                console.error("Failed to send command to Arduino:", err);
+              } else {
+                console.log("Sent command to Arduino:", command.trim());
+              }
+            });
+          }
+        }
+      });
+    });
+
+  // Listen for slot changes
+  db.collection("history")
+    .where("LOGGED_OUT", "==", null)
+    .onSnapshot((snapshot) => {
+      const occupiedSlots = snapshot.size;
+      const availableSlots = MAX_SLOTS - occupiedSlots;
+
+      if (serialPort && serialPort.isOpen) {
+        const command = `SLOTS:${availableSlots}\n`;
+        serialPort.write(command, (err) => {
+          if (err) {
+            console.error("Failed to send slot update to Arduino:", err);
+          } else {
+            console.log("Sent slot update to Arduino:", command.trim());
+          }
+        });
+      }
+    });
+}
+
+// Add this new function to update slot count
+async function updateSlotCount(db) {
+  try {
+    const snapshot = await db
+      .collection("history")
+      .where("LOGGED_OUT", "==", null)
+      .get();
+
+    const occupiedSlots = snapshot.size;
+    const availableSlots = MAX_SLOTS - occupiedSlots;
+
+    if (serialPort && serialPort.isOpen) {
+      const command = `SLOTS:${availableSlots}\n`;
+      serialPort.write(command);
+      console.log("Initial slot count sent to Arduino:", availableSlots);
+    }
+  } catch (error) {
+    console.error("Error updating slot count:", error);
   }
 }
 
@@ -197,26 +266,14 @@ function startSerialConnection(db) {
   try {
     const { db } = await initializeFirebase();
     console.log("Firebase Admin SDK initialized");
-
-    const isConnected = await testFirestoreConnection(db);
-
-    if (!isConnected) {
-      console.error(
-        "Could not connect to Firestore. Please check your credentials and service account."
-      );
-      process.exit(1);
-    }
-
     startSerialConnection(db);
+    console.log("Serial Manager initialized successfully");
   } catch (error) {
-    console.error("Fatal error:", error);
-    process.exit(1);
+    console.error("Failed to initialize Serial Manager:", error);
+    throw error;
   }
 })();
 
-// Handle process termination
-process.on("SIGINT", () => {
-  console.log("Closing serial port...");
-  if (serialPort) serialPort.close();
-  process.exit();
-});
+export default {
+  getSerialPort: () => serialPort,
+};

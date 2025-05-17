@@ -13,8 +13,9 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebasedepc/Firebase";
 import "./Manual.css";
+import { useModal } from "../context/ModalContext";
 
-function Manual() {
+function Manual({ serialPort }) {
   const [formData, setFormData] = useState({
     uid: "",
     name: "",
@@ -36,11 +37,14 @@ function Manual() {
   const [submitError, setSubmitError] = useState("");
   const [totalSlots] = useState(10);
   const [showParkingFullModal, setShowParkingFullModal] = useState(false);
-  const [entryGateStatus, setEntryGateStatus] = useState("Closed");
-  const [exitGateStatus, setExitGateStatus] = useState("Closed");
+  // Changed to uppercase to match properly with button logic
+  const [entryGateStatus, setEntryGateStatus] = useState("CLOSED");
+  const [exitGateStatus, setExitGateStatus] = useState("CLOSED");
   const [gateError, setGateError] = useState({ entry: null, exit: null });
   const [submitLoading, setSubmitLoading] = useState(false);
   const [gateLoading, setGateLoading] = useState({ entry: false, exit: false });
+  const { openModal, closeModal } = useModal();
+  const [rfidMode, setRfidMode] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -98,7 +102,15 @@ function Manual() {
   const checkAvailableSlots = async () => {
     const q = query(collection(db, "history"), where("LOGGED_OUT", "==", null));
     const snapshot = await getDocs(q);
-    return totalSlots - snapshot.docs.length;
+    const available = totalSlots - snapshot.docs.length;
+    console.log(
+      "Active vehicles:",
+      snapshot.docs.length,
+      "Available slots:",
+      available
+    );
+    // Never return negative slots
+    return available > 0 ? available : 0;
   };
 
   const logLogin = async (formData) => {
@@ -146,40 +158,30 @@ function Manual() {
       .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
   };
 
-  const logLogout = async (userId, docId) => {
-    try {
-      const docRef = doc(db, "history", docId);
-      const docSnap = await getDoc(docRef);
+  // Remove logLogout and handleConfirmLogout from the login form logic
 
-      if (!docSnap.exists()) {
-        alert("No document found!");
-        return;
-      }
-
-      const loginData = docSnap.data();
-      const loggedInTimestamp = loginData.LOGGED_IN;
-
-      if (!loggedInTimestamp) {
-        console.error("No login timestamp found");
-        return;
-      }
-
-      const totalTime = calculateTotalTime(loggedInTimestamp.toDate());
-
-      await updateDoc(docRef, {
-        LOGGED_OUT: serverTimestamp(),
-        TotalTime: totalTime,
-      });
-
-      alert("Logout successful!");
-    } catch (error) {
-      console.error("Error during logout:", error);
-      alert("Error during logout. Check console for details.");
-    }
+  // Check if UID or plate number is already logged in
+  const isVehicleAlreadyEntered = async (uid, plateNumber) => {
+    const q = query(
+      collection(db, "history"),
+      where("LOGGED_OUT", "==", null),
+      where("ID", "==", uid)
+    );
+    const plateQ = query(
+      collection(db, "history"),
+      where("LOGGED_OUT", "==", null),
+      where("Platenumber", "==", plateNumber)
+    );
+    const [uidSnapshot, plateSnapshot] = await Promise.all([
+      getDocs(q),
+      getDocs(plateQ),
+    ]);
+    return !uidSnapshot.empty || !plateSnapshot.empty;
   };
 
+  // Remove the logout button and logic from the vehicle login form
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     setSubmitError("");
 
     if (!validateForm()) {
@@ -188,12 +190,26 @@ function Manual() {
 
     setSubmitLoading(true);
     try {
-      const loggedIn = await isUserLoggedIn(formData.uid);
-      if (loggedIn) {
-        throw new Error(`User with ID ${formData.uid} is already logged in`);
+      // Check if vehicle (by UID or plate number) is already logged in
+      const alreadyEntered = await isVehicleAlreadyEntered(
+        formData.uid,
+        formData.plateNumber
+      );
+      if (alreadyEntered) {
+        setSubmitError("This vehicle has already entered.");
+        setSubmitLoading(false);
+        return;
       }
 
+      // Only allow login
       await logLogin(formData);
+
+      // If this was triggered by RFID, automatically open the gate
+      if (rfidMode) {
+        await sendGateCommand("Entry", "OPEN");
+        setTimeout(() => sendGateCommand("Entry", "CLOSE"), 5000);
+      }
+
       setButtonText("Logout");
       setFormData({ uid: "", name: "", plateNumber: "" });
       setFormErrors({});
@@ -205,48 +221,38 @@ function Manual() {
     }
   };
 
-  const handleGateControl = async (gate, action) => {
-    const gateType = gate.toLowerCase();
-    setGateLoading((prev) => ({ ...prev, [gateType]: true }));
-    setGateError((prev) => ({ ...prev, [gateType]: null }));
-
-    try {
-      // Simulate gate operation with timeout
-      await new Promise((resolve, reject) => {
-        setTimeout(() => {
-          // Simulate random failure
-          if (Math.random() < 0.1) {
-            // 10% chance of failure
-            reject(new Error(`Failed to ${action.toLowerCase()} ${gate} gate`));
-          }
-          resolve();
-        }, 1500);
-      });
-
-      if (gate === "Entry") {
-        setEntryGateStatus(action === "Open" ? "Open" : "Closed");
-      } else {
-        setExitGateStatus(action === "Open" ? "Open" : "Closed");
-      }
-    } catch (error) {
-      setGateError((prev) => ({ ...prev, [gateType]: error.message }));
-      console.error(`Gate operation error:`, error);
-    } finally {
-      setGateLoading((prev) => ({ ...prev, [gateType]: false }));
-    }
-  };
-
   const handleLogoutClick = (user) => {
-    setSelectedUser(user);
-    setShowModal(true);
+    openModal(
+      <div>
+        <h3>Confirm Logout</h3>
+        <p>Are you sure you want to log out this user?</p>
+        <div className="modal-details">
+          <p>UID: {user?.ID}</p>
+          <p>Name: {user?.Name}</p>
+          <p>Plate Number: {user?.Platenumber}</p>
+        </div>
+        <div className="modal-buttons">
+          <button
+            className="modal-button confirm"
+            onClick={async () => {
+              await handleConfirmLogout(user);
+              closeModal();
+            }}
+          >
+            Confirm
+          </button>
+          <button className="modal-button cancel" onClick={closeModal}>
+            Cancel
+          </button>
+        </div>
+      </div>
+    );
   };
 
-  const handleConfirmLogout = async () => {
-    if (!selectedUser) return;
+  const handleConfirmLogout = async (user) => {
+    if (!user) return;
     try {
-      await logLogout(selectedUser.ID, selectedUser.id);
-      setShowModal(false);
-      setSelectedUser(null);
+      await logLogout(user.ID, user.id);
       setSubmitError(""); // Clear error after successful logout
     } catch (error) {
       console.error("Error during logout:", error);
@@ -257,6 +263,55 @@ function Manual() {
   const handleInputFocus = () => {
     setSubmitError(""); // Clear error when user starts typing again
   };
+
+  const sendGateCommand = async (gate, action) => {
+    const gateKey = gate.toLowerCase();
+    setGateLoading({ ...gateLoading, [gateKey]: true });
+
+    try {
+      await addDoc(collection(db, "gate_commands"), {
+        gate: gate.toUpperCase(),
+        action: action.toUpperCase(),
+        timestamp: serverTimestamp(),
+      });
+
+      // Update gate status based on action immediately for better UI feedback
+      if (gateKey === "entry") {
+        setEntryGateStatus(action);
+      } else {
+        setExitGateStatus(action);
+      }
+    } catch (error) {
+      console.error("Gate command error:", error);
+      setGateError({
+        ...gateError,
+        [gateKey]: "Failed to send command",
+      });
+    } finally {
+      // Make sure to clear loading state
+      setTimeout(() => {
+        setGateLoading((prev) => ({ ...prev, [gateKey]: false }));
+      }, 500); // Small delay to ensure state updates properly
+    }
+  };
+
+  // Add useEffect to handle Arduino responses
+  useEffect(() => {
+    if (serialPort) {
+      serialPort.on("data", (data) => {
+        const response = data.toString().trim();
+        console.log("Arduino response:", response);
+
+        if (response.includes("ENTRY")) {
+          setEntryGateStatus(response.includes("OPEN") ? "OPEN" : "CLOSED");
+          setGateError({ ...gateError, entry: null });
+        } else if (response.includes("EXIT")) {
+          setExitGateStatus(response.includes("OPEN") ? "OPEN" : "CLOSED");
+          setGateError({ ...gateError, exit: null });
+        }
+      });
+    }
+  }, [serialPort]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -301,6 +356,40 @@ function Manual() {
     return () => unsubscribe();
   }, []);
 
+  // Add RFID listener
+  useEffect(() => {
+    const handleRfidDetected = (event) => {
+      const rfidData = event.detail;
+      console.log("RFID detected in Manual component:", rfidData);
+
+      // Temporarily disable manual input
+      setRfidMode(true);
+
+      // Auto-fill form with RFID data if needed
+      // You might want to fetch user data associated with this RFID
+      setFormData((prev) => ({
+        ...prev,
+        uid: rfidData,
+      }));
+
+      // Re-enable manual input after 5 seconds
+      setTimeout(() => setRfidMode(false), 5000);
+    };
+
+    window.addEventListener("rfidDetected", handleRfidDetected);
+    return () => window.removeEventListener("rfidDetected", handleRfidDetected);
+  }, []);
+
+  // Helper function to get proper CSS class for gate status display
+  const getStatusClass = (status) => {
+    return status === "OPEN" ? "open" : "closed";
+  };
+
+  // Helper function to get formatted gate status for display
+  const getDisplayStatus = (status) => {
+    return status === "OPEN" ? "Open" : "Closed";
+  };
+
   return (
     <div className="main-content">
       <div className="title">
@@ -314,7 +403,7 @@ function Manual() {
             </div>
             <form onSubmit={handleSubmit}>
               <div className="input-group">
-                <label>UID</label>
+                <label>UID {rfidMode && <span>(RFID Mode Active)</span>}</label>
                 <input
                   type="text"
                   name="uid"
@@ -323,6 +412,7 @@ function Manual() {
                   onFocus={handleInputFocus}
                   placeholder="Enter UID"
                   className={formErrors.uid ? "error" : ""}
+                  disabled={rfidMode}
                 />
                 {formErrors.uid && (
                   <span className="error-text">{formErrors.uid}</span>
@@ -338,6 +428,7 @@ function Manual() {
                   onFocus={handleInputFocus}
                   placeholder="Enter Name"
                   className={formErrors.name ? "error" : ""}
+                  disabled={rfidMode}
                 />
                 {formErrors.name && (
                   <span className="error-text">{formErrors.name}</span>
@@ -353,6 +444,7 @@ function Manual() {
                   onFocus={handleInputFocus}
                   placeholder="Enter Plate Number"
                   className={formErrors.plateNumber ? "error" : ""}
+                  disabled={rfidMode}
                 />
                 {formErrors.plateNumber && (
                   <span className="error-text">{formErrors.plateNumber}</span>
@@ -378,25 +470,27 @@ function Manual() {
                   className={`gate-button entry ${
                     gateLoading.entry ? "loading" : ""
                   }`}
-                  onClick={() => handleGateControl("Entry", "Open")}
-                  disabled={entryGateStatus === "Open" || gateLoading.entry}
+                  onClick={() => sendGateCommand("Entry", "OPEN")}
+                  disabled={gateLoading.entry || entryGateStatus === "OPEN"}
                 >
-                  {gateLoading.entry ? "Processing..." : "Open Gate"}
+                  Open Gate
+                </button>
+                <button
+                  className={`gate-button entry ${
+                    gateLoading.entry ? "loading" : ""
+                  }`}
+                  onClick={() => sendGateCommand("Entry", "CLOSED")}
+                  disabled={gateLoading.entry || entryGateStatus === "CLOSED"}
+                >
+                  Close Gate
                 </button>
                 {gateError.entry && (
                   <div className="gate-error">{gateError.entry}</div>
                 )}
-                <button
-                  className="gate-button entry"
-                  onClick={() => handleGateControl("Entry", "Close")}
-                  disabled={entryGateStatus === "Closed"}
-                >
-                  Close Gate
-                </button>
                 <div className="gate-status">
                   Status:{" "}
-                  <span className={entryGateStatus.toLowerCase()}>
-                    {entryGateStatus}
+                  <span className={getStatusClass(entryGateStatus)}>
+                    {getDisplayStatus(entryGateStatus)}
                   </span>
                 </div>
               </div>
@@ -411,25 +505,27 @@ function Manual() {
                   className={`gate-button exit ${
                     gateLoading.exit ? "loading" : ""
                   }`}
-                  onClick={() => handleGateControl("Exit", "Open")}
-                  disabled={exitGateStatus === "Open" || gateLoading.exit}
+                  onClick={() => sendGateCommand("Exit", "OPEN")}
+                  disabled={gateLoading.exit || exitGateStatus === "OPEN"}
                 >
-                  {gateLoading.exit ? "Processing..." : "Open Gate"}
+                  Open Gate
+                </button>
+                <button
+                  className={`gate-button exit ${
+                    gateLoading.exit ? "loading" : ""
+                  }`}
+                  onClick={() => sendGateCommand("Exit", "CLOSED")}
+                  disabled={gateLoading.exit || exitGateStatus === "CLOSED"}
+                >
+                  Close Gate
                 </button>
                 {gateError.exit && (
                   <div className="gate-error">{gateError.exit}</div>
                 )}
-                <button
-                  className="gate-button exit"
-                  onClick={() => handleGateControl("Exit", "Close")}
-                  disabled={exitGateStatus === "Closed"}
-                >
-                  Close Gate
-                </button>
                 <div className="gate-status">
                   Status:{" "}
-                  <span className={exitGateStatus.toLowerCase()}>
-                    {exitGateStatus}
+                  <span className={getStatusClass(exitGateStatus)}>
+                    {getDisplayStatus(exitGateStatus)}
                   </span>
                 </div>
               </div>
@@ -484,41 +580,11 @@ function Manual() {
         </div>
       )}
 
-      {showModal && !showParkingFullModal && (
+      {/* Show error modal only if not showing parking full modal and not showing logout modal */}
+      {showModal && submitError && !showParkingFullModal && !selectedUser && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h3>Confirm Logout</h3>
-            <p>Are you sure you want to log out this user?</p>
-            <div className="modal-details">
-              <p>UID: {selectedUser?.ID}</p>
-              <p>Name: {selectedUser?.Name}</p>
-              <p>Plate Number: {selectedUser?.Platenumber}</p>
-            </div>
-            <div className="modal-buttons">
-              <button
-                className="modal-button confirm"
-                onClick={handleConfirmLogout}
-              >
-                Confirm
-              </button>
-              <button
-                className="modal-button cancel"
-                onClick={() => {
-                  setShowModal(false);
-                  setSelectedUser(null);
-                }}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showModal && submitError && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h3>Parking Full</h3>
+            <h3>Error</h3>
             <p>{submitError}</p>
             <div className="modal-buttons">
               <button

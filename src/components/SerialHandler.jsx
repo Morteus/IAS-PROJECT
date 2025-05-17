@@ -1,11 +1,11 @@
 import { useEffect } from "react";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { db } from "../firebasedepc/Firebase";
+import serialService from "../services/SerialService";
 
-const SerialHandler = ({ serialPort }) => {
+const SerialHandler = () => {
   useEffect(() => {
-    // Remove manual connection logic
-    // Keep only the slot tracking logic
+    // Slot tracking logic
     const activeUsersQuery = query(
       collection(db, "history"),
       where("LOGGED_OUT", "==", null)
@@ -16,21 +16,18 @@ const SerialHandler = ({ serialPort }) => {
       const availableSlots = 10 - activeUserCount;
       console.log("Available slots:", availableSlots);
 
-      if (serialPort && serialPort.writable) {
-        const writer = serialPort.writable.getWriter();
+      if (serialService.isConnected()) {
         try {
           const data = `SLOTS:${availableSlots}\n`;
-          await writer.write(new TextEncoder().encode(data));
+          await serialService.write(data);
         } catch (error) {
           console.error("Error writing to serial:", error);
-        } finally {
-          writer.releaseLock();
         }
       }
     });
 
     return () => unsubscribe();
-  }, [serialPort]);
+  }, []);
 
   return null;
 };

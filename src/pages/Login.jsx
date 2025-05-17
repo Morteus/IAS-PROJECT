@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import "./Login.css";
+import "./login.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
+import { faEye, faEyeSlash, faCar } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import { handleLogin } from "../databaseComponent"; // Import handleLogin
 
 const termsAndConditionsContent = `
-  <h2>Terms and Conditions for Tpark</h2>
+  <h2>Terms and Conditions for Aparkr</h2>
   <p><b>Last updated: April 16, 2025</b></p>
   <p>Please read these terms and conditions carefully before using Our Service.</p>
   <h3>Interpretation and Definitions</h3>
@@ -23,7 +23,7 @@ const termsAndConditionsContent = `
     or other managing authority.</li>
     <li><b>Country</b> refers to: Philippines</li>
     <li><b>Company</b> (referred to as either "the Company", "We", "Us" or "Our" in this
-    Agreement) refers to TPark.Corp, 45 Rizal Street, Barangay San Antonio, Cavite
+    Agreement) refers to Aparkr.Corp, 45 Rizal Street, Barangay San Antonio, Cavite
     City, Cavite, 4100, Philippines.</li>
     <li><b>Device</b> means any device that can access the Service, such as a computer, a
     cellphone, or a digital tablet.</li>
@@ -34,7 +34,7 @@ const termsAndConditionsContent = `
     <li><b>Third-party Social Media Service</b> means any services or content (including
     data, information, products or services) provided by a third-party that may be
     displayed, included or made available by the Service.</li>
-    <li><b>Website</b> refers to Tpark, accessible from http://localhost:5173/</li>
+    <li><b>Website</b> refers to Aparkr, accessible from http://localhost:5173/</li>
     <li><b>You</b> means the individual accessing or using the Service, or the company, or
     other legal entity on behalf of which such individual is accessing or using the
     Service, as applicable.</li>
@@ -156,7 +156,7 @@ const termsAndConditionsContent = `
   or in part, please stop using the website and the Service.</p>
   <h3>Contact Us</h3>
   <p>If you have any questions about these Terms and Conditions, you can contact us:</p>
-  <p>By email: Tpark@gmail.com</p>
+  <p>By email: Aparkr@gmail.com</p>
 `;
 
 function Login() {
@@ -224,6 +224,14 @@ function Login() {
   return (
     <div className="login-body">
       <div className="login-container">
+        {/* Left: Image and System Title */}
+        <div className="login-image-section">
+          <div className="system-title">
+            <FontAwesomeIcon icon={faCar} />
+            APARKR
+          </div>
+        </div>
+        {/* Right: Login Form */}
         <div className="input-container">
           <h1>Login</h1>
           <form onSubmit={handleSubmit}>
@@ -266,7 +274,6 @@ function Login() {
             </div>
           </form>
         </div>
-        <div className="logo-container"></div>
       </div>
 
       {showTermsModal && (

@@ -26,3 +26,29 @@
     width: 100%;
   }
 }
+
+.connect-button {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 10px 20px;
+  background-color: #232323;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 1000;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.connect-button:hover {
+  background-color: #3a3a3a;
+  transform: translateY(-1px);
+}
+
+.connect-button:active {
+  transform: scale(0.98);
+}

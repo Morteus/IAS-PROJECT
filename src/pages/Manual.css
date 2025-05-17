@@ -177,8 +177,28 @@
 }
 
 .gate-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+  background-color: #cccccc !important;
+  border-color: #cccccc !important;
+  color: #666666 !important;
+  transform: none !important;
+  box-shadow: none !important;
+  pointer-events: none !important;
+  transition: none !important;
+}
+
+.gate-button.entry:disabled,
+.gate-button.exit:disabled {
+  background-color: #e0e0e0;
+  color: #666;
+  transform: none;
+  box-shadow: none;
+}
+
+.gate-button.loading {
+  cursor: wait !important;
+  pointer-events: none !important;
 }
 
 .gate-status {
@@ -322,7 +342,7 @@
   background-color: #3a3a3a !important;
 }
 
-/* Remove or comment out this block to avoid conflicts
+/* Uncomment and fix the modal-overlay styles */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -333,11 +353,10 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 9999;
+  z-index: 2000000; /* Increased to ensure it's above the connect button */
   pointer-events: auto;
   backdrop-filter: blur(4px);
 }
-*/
 
 .modal-content {
   background: white;
@@ -484,6 +503,19 @@
 
 .control-btn:disabled {
   background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+/* ...existing styles... */
+
+.input-group label span {
+  color: #4caf50;
+  font-size: 0.8em;
+  margin-left: 8px;
+}
+
+input:disabled {
+  background-color: #f5f5f5;
   cursor: not-allowed;
 }
 

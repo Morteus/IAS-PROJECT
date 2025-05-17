@@ -10,6 +10,7 @@ import LoginLogout from "./pages/LoginLogout";
 import Manual from "./pages/Manual";
 import Settings from "./pages/Settings";
 import { ModalProvider } from "./context/ModalContext";
+import serialService from "./services/SerialService";
 
 // Layout component for pages with NavBar
 const WithNavBar = ({ children }) => (
@@ -23,43 +24,45 @@ function App() {
   return (
     <ModalProvider>
       <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route
-            path="/dashboard"
-            element={
-              <WithNavBar>
-                <Dashboard />
-              </WithNavBar>
-            }
-          />
-          <Route
-            path="/history"
-            element={
-              <WithNavBar>
-                <History />
-              </WithNavBar>
-            }
-          />
-          <Route
-            path="/manual"
-            element={
-              <WithNavBar>
-                <Manual />
-              </WithNavBar>
-            }
-          />
-          <Route
-            path="/loginlogout"
-            element={
-              <WithNavBar>
-                <LoginLogout />
-              </WithNavBar>
-            }
-          />
-          <Route path="/Settings" element={<Settings />} />
-          <Route path="/" element={<Navigate to="/login" replace />} />
-        </Routes>
+        <div className="container">
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route
+              path="/dashboard"
+              element={
+                <WithNavBar>
+                  <Dashboard />
+                </WithNavBar>
+              }
+            />
+            <Route
+              path="/history"
+              element={
+                <WithNavBar>
+                  <History />
+                </WithNavBar>
+              }
+            />
+            <Route
+              path="/manual"
+              element={
+                <WithNavBar>
+                  <Manual />
+                </WithNavBar>
+              }
+            />
+            <Route
+              path="/loginlogout"
+              element={
+                <WithNavBar>
+                  <LoginLogout />
+                </WithNavBar>
+              }
+            />
+            <Route path="/Settings" element={<Settings />} />
+            <Route path="/" element={<Navigate to="/login" replace />} />
+          </Routes>
+        </div>
       </BrowserRouter>
     </ModalProvider>
   );
